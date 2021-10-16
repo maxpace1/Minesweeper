@@ -5,6 +5,8 @@ type t = {
   dug_up : bool;
 }
 
+exception NoOperationPerformed
+
 exception Explode
 
 let blank : t =
@@ -21,7 +23,7 @@ let create_square (mine : bool) (around : int) : t =
 let flag (sq : t) = { sq with flag_mine = not sq.flag_mine }
 
 let dig (sq : t) =
-  if sq.dug_up || sq.flag_mine then sq
+  if sq.dug_up || sq.flag_mine then raise NoOperationPerformed
   else if sq.is_mine then raise Explode
   else { sq with dug_up = true }
 

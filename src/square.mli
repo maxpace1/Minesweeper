@@ -5,6 +5,8 @@
 type t
 (** The abstract type of value representing a place on the gameboard. *)
 
+exception NoOperationPerformed
+
 exception Explode
 
 (* Operations *)
@@ -23,8 +25,8 @@ val flag : t -> t
 
 val dig : t -> t
 (** [dig sq] "digs up" a square. Attempting to dig up [sq] if it has
-    been flagged or if it has been dug up before will do nothing. Raises
-    [Explode] if square was a mine. *)
+    been flagged or if it has been dug up before will raise
+    [NoOperationPerformed]. Raises [Explode] if square was a mine. *)
 
 (* Accessing data *)
 
