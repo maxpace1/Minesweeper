@@ -1,3 +1,8 @@
 (executable
+<<<<<<< HEAD
  (name testing)
  (libraries Game ounit2))
+=======
+ (name main)
+ (libraries ounit2))
+>>>>>>> master
