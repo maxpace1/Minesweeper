@@ -26,7 +26,8 @@ val flag : t -> t
 val dig : t -> t
 (** [dig sq] "digs up" a square. Attempting to dig up [sq] if it has
     been flagged or if it has been dug up before will raise
-    [NoOperationPerformed]. Raises [Explode] if square was a mine. *)
+    [NoOperationPerformed]. Raises [Explode] if square was an unflagged
+    mine. *)
 
 (* Accessing data *)
 
