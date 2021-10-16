@@ -5,9 +5,6 @@
 type t
 (** The abstract type of value representing a place on the gameboard. *)
 
-exception AlreadyDugUp
-(** Raised when attempting to dig up square that has already been dug up *)
-
 exception Explode
 
 (* Operations *)
@@ -25,16 +22,17 @@ val flag : t -> t
     becomes unflagged, and an unflagged [sq] becomes flagged. *)
 
 val dig : t -> t
-(** [dig sq] "digs up" a square. Raises [Explode] if square was a mine.
-    Requires: [sq] has not been dug before, or will raise [AlreadyDugUp] *)
+(** [dig sq] "digs up" a square. Attempting to dig up [sq] if it has
+    been flagged or if it has been dug up before will do nothing. Raises
+    [Explode] if square was a mine. *)
 
 (* Accessing data *)
 
 val get_dug : t -> bool
 (** [get_dug sq] checks if [sq] has been dug up yet. *)
 
-val get_mark : t -> bool
-(** [get_mark sq] checks if [sq] has been dug up yet. *)
+val get_flag : t -> bool
+(** [get_flag sq] checks if [sq] has been dug up yet. *)
 
 val get_val : t -> int option
 (** [get_val sq] gets the number of surrounding mines of [sq] and
