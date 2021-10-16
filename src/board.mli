@@ -3,7 +3,7 @@
 type t
 (** The abstract type representing a gameboard *)
 
-type loc
+type loc = int * int
 (** The type representation of the location of a single square *)
 
 exception Mine
@@ -11,15 +11,21 @@ exception Mine
 (* Operations *)
 
 val empty : t
-(** An empty board with no mines placed and no squares revealed *)
+(** [empty] returns an empty board with no mines placed and no squares
+    revealed *)
+
+val custom_empty : int -> int -> t
+(** [custom_empty x y] returns an empty board with dimensions [x] and
+    [y] with no mines placed and no squares revealed. Requires that [x]
+    and [y] are positive integers from 1 to 100. *)
 
 val set_n_mines : t -> int -> loc -> unit
-(** [set_mines n board index] modifies [board] by placing [n] mines
-    pseudorandomly throughout. There will not be a mine at the location
-    denoted by [index]. Requires: input does not have any mines already
-    set or squares revealed, [index] is a valid location for [board],
-    and n is at least 0 and less than the number of empty tiles on the
-    board *)
+(** [set_mines board n start_loc] modifies [board] by placing [n] mines
+    pseudorandomly throughout. There will not be a mine at or around the
+    location denoted by [start_loc]. Requires: input does not have any
+    mines already set or squares revealed, [start_loc] is a valid
+    location for [board], and n is at least 0 and less than the number
+    of empty tiles on the board *)
 
 val flag : t -> loc -> unit
 (** [flag board index] flips the flagged state of the square located at
