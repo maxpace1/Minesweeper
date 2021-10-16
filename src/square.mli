@@ -11,6 +11,7 @@ exception Explode
 (* Operations *)
 
 val blank : t
+(** [blank] returns a placeholder square.*)
 
 val create_square : bool -> int -> t
 (** [create_square mine around] creates a square. [is_mine] represents
