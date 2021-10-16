@@ -11,7 +11,9 @@ exception AlreadyDugUp
 val blank : t
 
 val create_square : bool -> int -> t
-(** Creates a square. The square is a mine if the first *)
+(** [flag is_mine around] creates a square. [is_mine] represents if the
+    square itself is a mine, and [around] represents the number of
+    squares around it that are mines.*)
 
 val flag : t -> t
 (** [flag sq] flips the status of the flagged square i.e. a flagged [sq]
@@ -29,7 +31,7 @@ val get_mark : t -> bool
 (** [get_mark sq] checks if [sq] has been dug up yet. *)
 
 val get_explode : t -> bool
-(** [get_explode sq] returns [True] if [sq] was a mine and got dug up,
+(** [get_explode sq] returns [true] if [sq] was a mine and got dug up,
     exploding and ending the game. *)
 
 val get_val : t -> int option
