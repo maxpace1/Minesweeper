@@ -18,6 +18,11 @@ check:
 finalcheck:
 	@bash check.sh final
 
+lines: 
+	dune clean
+	ocamlbuild -clean
+	cloc --by-file --include-lang=OCaml .
+
 zip:
 	rm -f adventure.zip
 	zip -r adventure.zip . -x@exclude.lst
