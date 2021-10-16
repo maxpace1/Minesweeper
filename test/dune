@@ -1,3 +1,3 @@
 (executable
- (name main)
- (libraries temp ounit2))
+ (name testing)
+ (libraries Game ounit2))
