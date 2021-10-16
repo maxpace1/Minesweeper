@@ -1,4 +1,6 @@
-(** Representation of static place on board. *)
+(** Representation of static place on board.
+
+    @author Max Pace (map328), Jerry Xu (jjx6) *)
 
 type t
 (** The abstract type of value representing a place on the gameboard. *)
