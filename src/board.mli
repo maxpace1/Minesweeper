@@ -17,9 +17,9 @@ val empty : t
 val custom_empty : int -> int -> t
 (** [custom_empty x y] returns an empty board with dimensions [x] and
     [y] with no mines placed and no squares revealed. Requires that [x]
-    and [y] are positive integers from 1 to 100. *)
+    and [y] are positive integers from 10 to 99. *)
 
-val set_n_mines : t -> int -> loc -> unit
+val set_mines : t -> int -> loc -> unit
 (** [set_mines board n start_loc] modifies [board] by placing [n] mines
     pseudorandomly throughout. There will not be a mine at or around the
     location denoted by [start_loc]. Requires: input does not have any
