@@ -33,3 +33,7 @@ let get_flag (sq : t) = sq.flag_mine
 
 let get_val (sq : t) =
   if sq.dug_up && not sq.is_mine then Some sq.mines_around else None
+
+(* TODO REMOVE (debug purposes only) *)
+let test_print (sq : t) =
+  if sq.is_mine then "m" else string_of_int sq.mines_around

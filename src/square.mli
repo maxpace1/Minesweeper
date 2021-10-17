@@ -41,3 +41,6 @@ val get_val : t -> int option
 (** [get_val sq] gets the number of surrounding mines of [sq] and
     returns an integer 0-8 if it isn't a mine, or if [sq] has not been
     dug up yet, returns [None] *)
+
+val test_print : t -> string
+(** TODO REMOVE DEBUG ONLY pretty print mine or number *)

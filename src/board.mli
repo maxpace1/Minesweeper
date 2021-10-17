@@ -41,3 +41,6 @@ val dig : t -> loc -> unit
 
 val pp_board : Format.formatter -> t -> unit
 (** Pretty prints a board to the console *)
+
+val shitty_toString : t -> string
+(** TODO REMOVE DEBUG ONLY Pretty prints a board to the console *)

@@ -110,4 +110,8 @@ let suite =
   "test suite for minesweeper"
   >::: List.flatten [ square_tests; board_tests ]
 
-let _ = run_test_tt_main suite
+let _ =
+  run_test_tt_main suite;
+  let my_board = Board.custom_empty 10 10 in
+  Board.set_mines my_board 10 (5, 5);
+  print_endline (Board.shitty_toString my_board)

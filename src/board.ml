@@ -106,3 +106,17 @@ let dig b i =
     | Square.Explode -> raise Mine)
 
 let pp_board fmt b = failwith "Unimplemented"
+
+(* TODO REMOVE (debug purposes only) *)
+let shitty_toString my_board =
+  let ret_str = ref "" in
+  for y = 0 to Array.length my_board.(0) - 1 do
+    for x = 0 to Array.length my_board - 1 do
+      let new_str =
+        !ret_str ^ Square.test_print my_board.(x).(y) ^ " "
+      in
+      ret_str := new_str
+    done;
+    ret_str := !ret_str ^ "\n"
+  done;
+  !ret_str
