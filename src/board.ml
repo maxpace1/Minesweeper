@@ -8,6 +8,10 @@ let random = Random.init (int_of_float (Unix.gettimeofday ()))
 
 exception Mine
 
+(* AF: A 2D array of squares.
+
+   RI: TODO: we need to check that points totals match, other stuff. *)
+
 (* let empty = Array.make (30 * 16) Square.blank *)
 let empty = Array.make_matrix 30 16 Square.blank
 

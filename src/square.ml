@@ -5,6 +5,14 @@ type t = {
   dug_up : bool;
 }
 
+(* AF: If a square is blank or flag (to user), [dug_up] will be false.
+   [flag_mine] represents a flagged mine -> has no effect if square has
+   been dug up. [mines_around] shows how many mines surround the current
+   square to display to the user if the square has been dug up and is
+   not a mine.
+
+   RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false. *)
+
 exception NoOperationPerformed
 
 exception Explode
