@@ -44,4 +44,4 @@ let get_val (sq : t) =
 
 (* TODO REMOVE (debug purposes only) *)
 let test_print (sq : t) =
-  if sq.is_mine then "m" else string_of_int sq.mines_around
+  if sq.is_mine then "*" else string_of_int sq.mines_around

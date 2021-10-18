@@ -104,7 +104,36 @@ let square_tests =
 
 open Board
 
-let board_tests = []
+let exc_test name f arg exc =
+  name >:: fun _ -> assert_raises exc (fun () -> f arg)
+
+let get_square board (x, y) =
+  String.get (to_string board)
+    ((x * 3) + 3 + ((dim_y board - 1 - y) * ((dim_x board * 3) + 3 + 1)))
+
+let loc_value_test name board loc out =
+  name >:: fun _ ->
+  assert_equal out (get_square board loc) ~printer:Char.escaped
+
+let empty_board =
+  let b = empty in
+  set_mines b 0 (0, 0);
+  b
+
+let mine_board =
+  let b = custom_empty 10 10 in
+  set_mines b 91 (5, 5);
+  b
+
+let board_tests =
+  [
+    loc_value_test "empty board bl corner is 0" empty_board (0, 0) '0';
+    loc_value_test "empty board br corner is 0" empty_board (29, 0) '0';
+    loc_value_test "empty board tl corner is 0" empty_board (0, 15) '0';
+    loc_value_test "empty board tr corner is 0" empty_board (29, 15) '0';
+    loc_value_test "mine board bl corner is *" mine_board (0, 0) '*';
+    exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
+  ]
 
 let suite =
   "test suite for minesweeper"
@@ -113,5 +142,5 @@ let suite =
 let _ =
   run_test_tt_main suite;
   let my_board = Board.custom_empty 30 16 in
-  Board.set_mines my_board 10 (5, 5);
-  print_endline (Board.shitty_toString my_board)
+  Board.set_mines my_board 99 (15, 8);
+  print_endline (Board.to_string mine_board)

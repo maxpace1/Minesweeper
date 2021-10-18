@@ -20,6 +20,10 @@ let custom_empty x y =
     Array.make_matrix x y Square.blank
   else failwith "Bad Size Arguments"
 
+let dim_x b = Array.length b
+
+let dim_y b = Array.length b.(0)
+
 let check_loc (my_board : t) (random_loc : loc) : bool =
   0 <= fst random_loc
   && fst random_loc < Array.length my_board
@@ -125,7 +129,7 @@ let add_x_axis str n =
   !str
 
 (* TODO REMOVE (debug purposes only) *)
-let shitty_toString my_board =
+let to_string my_board =
   let ret_str = ref "" in
   for y = 0 to Array.length my_board.(0) - 1 do
     for x = 0 to Array.length my_board - 1 do
