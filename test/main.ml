@@ -112,6 +112,6 @@ let suite =
 
 let _ =
   run_test_tt_main suite;
-  let my_board = Board.custom_empty 10 10 in
+  let my_board = Board.custom_empty 30 16 in
   Board.set_mines my_board 10 (5, 5);
   print_endline (Board.shitty_toString my_board)

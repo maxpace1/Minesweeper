@@ -39,7 +39,7 @@ val dig : t -> loc -> unit
 
 (* Accessing Data *)
 
-val pp_board : Format.formatter -> t -> unit
+val pp_board : t -> unit
 (** Pretty prints a board to the console *)
 
 val shitty_toString : t -> string
