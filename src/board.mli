@@ -20,13 +20,14 @@ val custom_empty : int -> int -> t
     [y] with no mines placed and no squares revealed. Requires that [x]
     and [y] are positive integers from 10 to 99. *)
 
-val set_mines : t -> int -> loc -> unit
-(** [set_mines board n start_loc] modifies [board] by placing [n] mines
-    pseudorandomly throughout. There will not be a mine at or around the
-    location denoted by [start_loc]. Requires: input does not have any
-    mines already set or squares revealed, [start_loc] is a valid
-    location for [board], and n is at least 0 and less than the number
-    of empty tiles on the board *)
+val set_mines : loc -> int -> loc -> t
+(** [set_mines dim n start_loc] modifies an empty board of dimensions
+    [dim] by placing [n] mines pseudorandomly throughout. There will not
+    be a mine at or around the location denoted by [start_loc].
+    Requires: input does not have any mines already set or squares
+    revealed, [start_loc] is a valid location for [board], and n is at
+    least 0 and less than the number of empty tiles on the board minus 9
+    tiles (the start location and the 8 surrounding tiles) *)
 
 val flag : t -> loc -> unit
 (** [flag board index] flips the flagged state of the square located at
