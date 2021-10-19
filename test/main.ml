@@ -8,11 +8,11 @@ let create_valid_square x = create_square false x |> dig
 
 let mine = create_square true 1
 
-let marked_mine = mine |> flag
+let flagged_mine = mine |> flag
 
 let square = create_square false 2
 
-let marked_square = mine |> flag
+let flagged_square = mine |> flag
 
 let dug_square = square |> dig
 
@@ -64,11 +64,11 @@ let square_tests =
       "get_val of undug square that has mines surrounding is None" false
       8 None;
     flag_test "blank square becomes marked when flagged" blank true;
-    flag_test "unmarked square becomes marked when flagged" square true;
-    flag_test "marked square becomes unmarked when flagged"
-      marked_square false;
-    flag_test "unmarked mine becomes marked when flagged" mine true;
-    flag_test "marked mine becomes unmarked when flagged" marked_mine
+    flag_test "unflaged square becomes marked when flagged" square true;
+    flag_test "flaged square becomes unmarked when flagged"
+      flagged_square false;
+    flag_test "unflagged mine becomes marked when flagged" mine true;
+    flag_test "flagged mine becomes unmarked when flagged" flagged_mine
       false;
     exception_dig_test "raises Explode if a mine is dug up" Explode mine;
     exception_dig_test
@@ -77,10 +77,10 @@ let square_tests =
     exception_dig_test
       "raises NoOperationPerformed if a flagged non-mine square is dug \
        up"
-      NoOperationPerformed marked_square;
+      NoOperationPerformed flagged_square;
     exception_dig_test
       "raises NoOperationPerformed if a flagged mine is dug up"
-      NoOperationPerformed marked_mine;
+      NoOperationPerformed flagged_mine;
     dig_test "blank square becomes dug when dug" blank true;
     dig_test "undug square becomes dug when dug" square true;
     get_val_test "get_val of value of blank square should be None" blank
@@ -104,16 +104,10 @@ open Board
 let exc_test name f arg exc =
   name >:: fun _ -> assert_raises exc (fun () -> f arg)
 
-let get_square board (x, y) =
-  String.get (to_string board)
-    ((x * 3) + 3
-    + ((dim_y board - 1 - y) * ((dim_x board * 3) + 3 + 1))
-    + 1)
-
 let loc_value_test name board loc out =
   name >:: fun _ ->
   assert_equal out
-    (match loc |> get_loc board |> Square.dig |> Square.get_val with
+    (match Square.get_val (get_loc_apply_fun board loc Square.dig) with
     | Some i -> i
     | None -> failwith "Nothing to see here")
 

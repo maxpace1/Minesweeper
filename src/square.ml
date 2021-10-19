@@ -11,7 +11,8 @@ type t = {
    square to display to the user if the square has been dug up and is
    not a mine.
 
-   RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false. *)
+   RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false.
+   [flag_mine] && [dug_up] false. *)
 
 exception NoOperationPerformed
 
@@ -24,7 +25,7 @@ let mines_ok mines_around =
 
 let rep_ok t =
   mines_ok t.mines_around;
-  assert (not (t.is_mine && t.dug_up))
+  assert ((not (t.is_mine && t.dug_up)) && not (t.flag_mine && t.dug_up))
 
 let return_rep_ok t =
   rep_ok t;
