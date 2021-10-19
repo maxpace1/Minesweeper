@@ -126,10 +126,10 @@ let set_mines my_board_dim number_mines start_loc =
     return_rep_ok (copy_mines my_board mine_locs)
   else failwith "Invalid start position"
 
-let flag b i =
+let flag b (i : loc) =
   rep_ok b;
   b.(fst i).(snd i) <- Square.flag b.(fst i).(snd i);
-  rep_ok
+  rep_ok b
 
 let dig b i =
   rep_ok b;
@@ -140,9 +140,7 @@ let dig b i =
 
 let pp_board b = failwith "Unimplemented"
 
-let to_string b =
-  rep_ok b;
-  "depression"
+let to_string b = rep_ok b
 
 (* TODO REMOVE (debug purposes only) *)
 
@@ -160,7 +158,6 @@ let add_x_axis str n =
   !str
 
 let testing_to_string my_board =
-  rep_ok my_board;
   let ret_str = ref "" in
   for y = 0 to dim_y my_board - 1 do
     for x = 0 to dim_x my_board - 1 do
@@ -179,3 +176,5 @@ let testing_to_string my_board =
     ret_str := !ret_str ^ "\n"
   done;
   add_x_axis ret_str (dim_x my_board)
+
+let to_string = testing_to_string

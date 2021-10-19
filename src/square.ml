@@ -53,14 +53,16 @@ let dig (sq : t) =
   else return_rep_ok { sq with dug_up = true }
 
 let ok_checker (sq : t) (adj_sq_list : t list) : bool =
-  rep_ok sq;
-  List.length
-    (List.filter
-       (fun sq ->
-         rep_ok sq;
-         sq.is_mine)
-       adj_sq_list)
-  = sq.mines_around
+  sq.mines_around = -1
+  ||
+  (rep_ok sq;
+   List.length
+     (List.filter
+        (fun sq ->
+          rep_ok sq;
+          sq.is_mine)
+        adj_sq_list)
+   = sq.mines_around)
 
 let get_dug (sq : t) =
   rep_ok sq;

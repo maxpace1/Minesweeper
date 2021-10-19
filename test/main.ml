@@ -114,15 +114,9 @@ let loc_value_test name board loc out =
   name >:: fun _ ->
   assert_equal out (get_square board loc) ~printer:Char.escaped
 
-let empty_board =
-  let b = empty in
-  set_mines b 0 (0, 0);
-  b
+let empty_board = set_mines (30, 16) 0 (0, 0)
 
-let mine_board =
-  let b = custom_empty 10 10 in
-  set_mines b 91 (5, 5);
-  b
+let mine_board = set_mines (10, 10) 91 (5, 5)
 
 let board_tests =
   [
@@ -130,10 +124,10 @@ let board_tests =
       (0, 0) '0';
     loc_value_test "empty board bottom right corner is 0" empty_board
       (29, 0) '0';
-    loc_value_test "empty board top left corner is 0" empty_board
-      (0, 15) '0';
-    loc_value_test "empty board top right corner is 0" empty_board
-      (29, 15) '0';
+    loc_value_test "empty board top left\n       corner is 0"
+      empty_board (0, 15) '0';
+    loc_value_test "empty board\n       top right corner is 0"
+      empty_board (29, 15) '0';
     loc_value_test "mine board top left corner is *" mine_board (0, 0)
       '*';
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
@@ -145,6 +139,5 @@ let suite =
 
 let _ =
   run_test_tt_main suite;
-  let my_board = Board.custom_empty 30 16 in
-  Board.set_mines my_board 99 (15, 8);
-  print_endline (Board.to_string mine_board)
+  let my_board = Board.set_mines (30, 16) 99 (15, 8) in
+  print_endline (Board.to_string my_board)
