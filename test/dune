@@ -1,3 +1,5 @@
 (executable
  (name main)
- (libraries Game ounit2))
+ (libraries Game ounit2)
+  (instrumentation
+  (backend bisect_ppx)))

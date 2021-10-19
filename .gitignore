@@ -1,5 +1,5 @@
 # assignment
-adventure.zip
+minesweeper.zip
 
 # ocaml
 *.cmo
@@ -10,6 +10,8 @@ adventure.zip
 *.native
 *.byte
 _build
+_coverage
+*.coverage
 
 # temporary files
 *.swp

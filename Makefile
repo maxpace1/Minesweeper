@@ -7,7 +7,7 @@ utop:
 	OCAMLRUNPARAM=b dune utop src
 
 test:
-	OCAMLRUNPARAM=b dune exec test/main.exe
+	dune exec --instrument-with bisect_ppx test/main.exe
 
 demo.1:
 	OCAMLRUNPARAM=b dune exec demo1/main.exe
@@ -33,7 +33,18 @@ zip:
 
 clean:
 	dune clean
-	rm -f adventure.zip
+	rm -f minesweeper.zip
+	rm -rf _coverage bisect*.coverage
+
+bisect: clean test
+	bisect-ppx-report html --theme=light
 
 doc:
 	dune build @doc
+
+opendoc:
+	open _build/default/_doc/_html/index.html
+
+openbisect:
+	open _coverage/index.html
+	
