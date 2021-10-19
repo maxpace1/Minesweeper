@@ -146,8 +146,8 @@ let dig b i =
 
 (* Appends the x-axis to the board. Requires a newline for the axis to
    be written on *)
-let add_x_axis str n =
-  str := !str ^ "  +";
+let add_x_axis n =
+  let str = ref "  +" in
   for x = 0 to n - 1 do
     str := !str ^ "---"
   done;
@@ -251,7 +251,8 @@ let pp_board b =
         print_string [ Background White ] " "
       done;
       print_string [ default ] "\n"
-    done)
+    done;
+    print_string [ Background White ] (add_x_axis (dim_x b)))
 
 let to_string b = rep_ok b
 
@@ -275,6 +276,6 @@ let testing_to_string my_board =
     done;
     ret_str := !ret_str ^ "\n"
   done;
-  add_x_axis ret_str (dim_x my_board)
+  !ret_str ^ add_x_axis (dim_x my_board)
 
 let to_string = testing_to_string
