@@ -121,13 +121,13 @@ let mine_board = set_mines (10, 10) 91 (5, 5)
 let board_tests =
   [
     loc_value_test "empty board bottom left corner is 0" empty_board
-      (0, 0) '0';
+      (0, 0) ' ';
     loc_value_test "empty board bottom right corner is 0" empty_board
-      (29, 0) '0';
+      (29, 0) ' ';
     loc_value_test "empty board top left\n       corner is 0"
-      empty_board (0, 15) '0';
+      empty_board (0, 15) ' ';
     loc_value_test "empty board\n       top right corner is 0"
-      empty_board (29, 15) '0';
+      empty_board (29, 15) ' ';
     loc_value_test "mine board top left corner is *" mine_board (0, 0)
       '*';
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
@@ -140,4 +140,4 @@ let suite =
 let _ =
   run_test_tt_main suite;
   let my_board = Board.set_mines (30, 16) 99 (15, 8) in
-  print_endline (Board.to_string my_board)
+  Board.pp_board my_board

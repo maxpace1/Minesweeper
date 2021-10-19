@@ -79,4 +79,7 @@ let get_val (sq : t) =
 (* TODO REMOVE (debug purposes only) *)
 let test_print (sq : t) =
   rep_ok sq;
-  if sq.is_mine then "*" else string_of_int sq.mines_around
+  if sq.is_mine then "*"
+  else
+    let k = sq.mines_around in
+    if k = 0 then " " else string_of_int k
