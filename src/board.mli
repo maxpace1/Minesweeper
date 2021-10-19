@@ -17,6 +17,11 @@ type loc = int * int
 exception Mine
 (** The exception raised when a mine is attempted to be dug *)
 
+val get_loc_apply_fun : t -> loc -> (Square.t -> 'a) -> 'a
+(** [get_loc_apply_fun board location sq_fun] gets the square at a given
+    [location] from board [board] and applies a function [sq_fun] to it,
+    returning the result. *)
+
 (* Operations *)
 
 val empty : t
@@ -47,13 +52,10 @@ val dig : t -> loc -> unit
     [board]. Requires: [index] is a valid location for [board]. Raises
     [Mine] if the location being cleared contains a mine *)
 
-(* Accessing Data *)
+(* Printing Data *)
 
 val pp_board : t -> unit
 (** Pretty prints a board to the console *)
 
-val to_string : t -> string
-(** TODO REMOVE DEBUG ONLY Pretty prints a board to the console *)
-
-val get_loc : t -> loc -> Square.t
+val pp_answers : t -> unit
 (** TODO HIDE DEBUG ONLY Pretty prints a board to the console *)
