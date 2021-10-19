@@ -151,18 +151,20 @@ let dig b i =
     | Square.Explode -> raise Mine);
   rep_ok b
 
-(* Appends the x-axis to the board. Requires a newline for the axis to
-   be written on *)
 let add_x_axis n =
-  let str = ref "  +" in
-  for x = 0 to n - 1 do
-    str := !str ^ "---"
-  done;
-  str := !str ^ "\n   ";
-  for x = 0 to n - 1 do
-    str := !str ^ (if x < 10 then "0" else "") ^ string_of_int x ^ " "
-  done;
-  !str
+  ANSITerminal.(
+    let style = [ Background White; Foreground Black ] in
+    print_string style "  +";
+    for x = 0 to n - 1 do
+      print_string style "---"
+    done;
+    print_string [ default ] "\n";
+    print_string style "   ";
+    for x = 0 to n - 1 do
+      print_string style
+        ((if x < 10 then "0" else "") ^ string_of_int x ^ " ")
+    done;
+    print_string [ default ] "\n")
 
 let pp_color_match process_char =
   ANSITerminal.(
@@ -213,9 +215,7 @@ let pp_answers b =
       done;
       print_string [ default ] "\n"
     done;
-    print_string
-      [ Foreground Black; Background White ]
-      (add_x_axis (dim_x b));
+    add_x_axis (dim_x b);
     print_string [ default ] " \n")
 
 let pp_board b =
@@ -224,7 +224,8 @@ let pp_board b =
   ANSITerminal.(
     for y = 0 to dim_y b - 1 do
       for x = 0 to dim_x b - 1 do
-        print_string [ Background White ]
+        print_string
+          [ Background White; Foreground Black ]
           (if x = 0 then
            let index = dim_y b - 1 - y in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
@@ -233,6 +234,6 @@ let pp_board b =
       done;
       print_string [ default ] "\n"
     done;
-    print_string [ Background White ] (add_x_axis (dim_x b)))
+    add_x_axis (dim_x b))
 
 let to_string b = rep_ok b
