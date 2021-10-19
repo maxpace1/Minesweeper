@@ -181,28 +181,28 @@ let pp_board_all b =
               [ Background White ]
           | "1" ->
               was_green := false;
-              [ Background White; Foreground Blue ]
+              [ Bold; Background White; Foreground Blue ]
           | "2" ->
               was_green := false;
-              [ Background White; Foreground Green ]
+              [ Bold; Background White; Foreground Green ]
           | "3" ->
               was_green := false;
-              [ Background White; Foreground Red ]
+              [ Bold; Background White; Foreground Red ]
           | "4" ->
               was_green := false;
-              [ Background White; Foreground Cyan ]
+              [ Bold; Background White; Foreground Cyan ]
           | "5" ->
               was_green := false;
-              [ Background White; Foreground Black ]
+              [ Bold; Background White; Foreground Black ]
           | "6" ->
               was_green := false;
-              [ Background White; Foreground Magenta ]
+              [ Bold; Background White; Foreground Magenta ]
           | "7" ->
               was_green := false;
-              [ Background White; Foreground Yellow ]
+              [ Bold; Background White; Foreground Yellow ]
           | "8" ->
               was_green := false;
-              [ Foreground White; Background Black ]
+              [ Bold; Foreground White; Background Black ]
           | _ ->
               was_green := true;
               [ Background Green ]
