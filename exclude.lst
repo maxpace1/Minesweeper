@@ -1,0 +1,9 @@
+_build/*
+.git/*
+demo/*
+.DS_Store
+*.zip
+.gitignore
+.ocamlformat
+.ocamlinit
+*.pdf

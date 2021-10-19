@@ -12,6 +12,9 @@ test:
 demo.1:
 	OCAMLRUNPARAM=b dune exec demo1/main.exe
 
+utopdemo.1:
+	dune utop src
+
 check:
 	@bash check.sh
 
@@ -25,8 +28,8 @@ lines:
 	make build
 
 zip:
-	rm -f adventure.zip
-	zip -r adventure.zip . -x@exclude.lst
+	rm -f minesweeper.zip
+	zip -r minesweeper.zip . -x@exclude.lst
 
 clean:
 	dune clean
