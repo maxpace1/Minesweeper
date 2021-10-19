@@ -139,8 +139,9 @@ let to_string my_board =
            let index = Array.length my_board.(0) - 1 - y in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "")
+        ^ " "
         ^ Square.test_print my_board.(x).(y)
-        ^ "  "
+        ^ " "
       in
       ret_str := new_str
     done;
