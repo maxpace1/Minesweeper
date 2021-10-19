@@ -13,7 +13,7 @@ type t = {
 
    RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false. *)
 
-exception NoOperationPerformed
+exception NoOperationPerformed of string
 
 exception Explode
 
@@ -48,7 +48,13 @@ let flag (sq : t) =
 
 let dig (sq : t) =
   rep_ok sq;
-  if sq.dug_up || sq.flag_mine then raise NoOperationPerformed
+  if sq.dug_up then
+    raise (NoOperationPerformed "This square has already been dug up!")
+  else if sq.flag_mine then
+    raise
+      (NoOperationPerformed
+         "This square is flagged. To dig it up, you must unflag it \
+          first!")
   else if sq.is_mine then raise Explode
   else return_rep_ok { sq with dug_up = true }
 

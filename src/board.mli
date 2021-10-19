@@ -21,7 +21,7 @@ exception Mine
 
 val empty : t
 (** [empty] returns an empty board with no mines placed and no squares
-    revealed *)
+    revealed. The default size for an empty board is 30 by 16 *)
 
 val custom_empty : int -> int -> t
 (** [custom_empty x y] returns an empty board with dimensions [x] and

@@ -101,8 +101,35 @@ let square_tests =
 
 open Board
 
+let _ = Random.init (int_of_float (Unix.gettimeofday ()))
+
 let exc_test name f arg exc =
   name >:: fun _ -> assert_raises exc (fun () -> f arg)
+
+let custom_empty_test
+    (name : string)
+    (dimx : int)
+    (dimy : int)
+    (expected_output : int * int) : test =
+  name >:: fun _ ->
+  assert_equal
+    (custom_empty dimx dimy |> dim_x, custom_empty dimx dimy |> dim_y)
+    expected_output
+
+let alter_board_test
+    (func : Square.t -> bool)
+    (func2 : t -> loc -> unit)
+    (name : string)
+    (board : Board.t)
+    (loc : loc)
+    (expected_output : bool) : test =
+  name >:: fun _ ->
+  func2 board loc;
+  assert_equal (get_loc board loc |> func) expected_output
+
+let flag_test = alter_board_test get_flag flag
+
+let dig_test = alter_board_test get_dug dig
 
 let get_square board (x, y) =
   String.get (to_string board)
@@ -119,10 +146,25 @@ let loc_value_test name board loc out =
 
 let empty_board = set_mines (30, 16) 0 (0, 0)
 
+let _ = flag empty_board (1, 1)
+
 let mine_board = set_mines (10, 10) 91 (5, 5)
+
+let generate_board =
+  let dim_x = Random.int 90 + 10 in
+  let dim_y = Random.int 90 + 10 in
+  let mines = Random.int ((dim_x * dim_y) - 9) in
+  let start_loc = (Random.int dim_x, Random.int dim_y) in
+  for i = 0 to 1000 do
+    set_mines (dim_x, dim_y) mines start_loc |> ignore
+  done
 
 let board_tests =
   [
+    custom_empty_test "custom square board gets dimensions correctly" 10
+      10 (10, 10);
+    custom_empty_test "custom nonsquare board gets dimensions correctly"
+      99 15 (99, 15);
     loc_value_test "empty board bottom left corner is 0" empty_board
       (0, 0) 0;
     loc_value_test "empty board bottom right corner is 0" empty_board
@@ -134,6 +176,14 @@ let board_tests =
     (* loc_value_test "mine board top left corner is *" mine_board (0,
        0) '*'; *)
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
+    ( "empty board should have default size of 30 by 16" >:: fun _ ->
+      assert_equal (empty |> dim_x, empty |> dim_y) (30, 16) );
+    flag_test "flagging unflagged square should mark it as flagged"
+      empty_board (0, 0) true;
+    flag_test "flagging flagged square should mark it as unflagged"
+      empty_board (1, 1) false;
+    dig_test "digging undig square should mark it as dug" empty_board
+      (2, 2) true;
   ]
 
 let suite =

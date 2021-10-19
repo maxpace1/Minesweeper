@@ -4,7 +4,7 @@ type t = sq_type Array.t Array.t
 
 type loc = int * int
 
-let random = Random.init (int_of_float (Unix.gettimeofday ()))
+let _ = Random.init (int_of_float (Unix.gettimeofday ()))
 
 exception Mine
 
@@ -141,7 +141,8 @@ let dig b i =
   rep_ok b;
   b.(fst i).(snd i) <-
     (try Square.dig b.(fst i).(snd i) with
-    | Square.Explode -> raise Mine);
+    | Square.Explode -> raise Mine
+    | Square.NoOperationPerformed -> raise Mine);
   rep_ok b
 
 (* Appends the x-axis to the board. Requires a newline for the axis to
