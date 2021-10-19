@@ -3,6 +3,14 @@
 type t
 (** The abstract type representing a gameboard *)
 
+val dim_x : t -> int
+(** The size of the board in the x-direction, i.e. the number of Squares
+    in one row *)
+
+val dim_y : t -> int
+(** The size of the board in the y-direction, i.e. the number of Squares
+    in one column *)
+
 type loc = int * int
 (** The type representation of the location of a single square *)
 
@@ -46,11 +54,3 @@ val pp_board : t -> unit
 
 val to_string : t -> string
 (** TODO REMOVE DEBUG ONLY Pretty prints a board to the console *)
-
-val dim_x : t -> int
-(** The size of the board in the x-direction, i.e. the number of Squares
-    in one row *)
-
-val dim_y : t -> int
-(** The size of the board in the y-direction, i.e. the number of Squares
-    in one column *)
