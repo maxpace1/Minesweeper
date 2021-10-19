@@ -140,4 +140,5 @@ let suite =
 let _ =
   run_test_tt_main suite;
   let my_board = Board.set_mines (30, 16) 99 (15, 8) in
-  Board.pp_board my_board
+  dig my_board (15, 8);
+  pp_board my_board

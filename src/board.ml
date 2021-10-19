@@ -138,31 +138,98 @@ let dig b i =
     | Square.Explode -> raise Mine);
   rep_ok b
 
+let pp_loc b loc =
+  let out_char = Square.get_val b.(fst loc).(snd loc) in
+  let process_char =
+    match out_char with
+    | Some i -> string_of_int i
+    | None -> " "
+  in
+  ANSITerminal.(
+    let my_style =
+      match process_char with
+      | "0" -> [ Background White ]
+      | "1" -> [ Background White; Foreground Blue ]
+      | "2" -> [ Background White; Foreground Green ]
+      | "3" -> [ Background White; Foreground Red ]
+      | "4" -> [ Background White; Foreground Cyan ]
+      | "5" -> [ Background White; Foreground Black ]
+      | "6" -> [ Background White; Foreground Magenta ]
+      | "7" -> [ Background White; Foreground Yellow ]
+      | "8" -> [ Foreground White; Background Black ]
+      | _ -> [ Background Green ]
+    in
+    if process_char <> "0" then print_string my_style process_char
+    else print_string my_style " ")
+
+let pp_board_all b =
+  ANSITerminal.(
+    for y = 0 to dim_y b - 1 do
+      let was_green = ref false in
+      for x = 0 to dim_x b - 1 do
+        print_string
+          [ Background White; Foreground Black ]
+          (if x = 0 then
+           let index = dim_y b - 1 - y in
+           (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
+          else "");
+        let out_char = Square.test_print b.(x).(y) in
+        let my_style =
+          match out_char with
+          | "0" ->
+              was_green := false;
+              [ Background White ]
+          | "1" ->
+              was_green := false;
+              [ Background White; Foreground Blue ]
+          | "2" ->
+              was_green := false;
+              [ Background White; Foreground Green ]
+          | "3" ->
+              was_green := false;
+              [ Background White; Foreground Red ]
+          | "4" ->
+              was_green := false;
+              [ Background White; Foreground Cyan ]
+          | "5" ->
+              was_green := false;
+              [ Background White; Foreground Black ]
+          | "6" ->
+              was_green := false;
+              [ Background White; Foreground Magenta ]
+          | "7" ->
+              was_green := false;
+              [ Background White; Foreground Yellow ]
+          | "8" ->
+              was_green := false;
+              [ Foreground White; Background Black ]
+          | _ ->
+              was_green := true;
+              [ Background Green ]
+        in
+        if !was_green then print_string [ Background Green ] " "
+        else print_string [ Background White ] " ";
+        if out_char <> "0" then print_string my_style out_char
+        else print_string my_style " ";
+        if !was_green then print_string [ Background Green ] " "
+        else print_string [ Background White ] " "
+      done;
+      print_string [ default ] "\n"
+    done)
+
 let pp_board b =
+  pp_board_all b;
   ANSITerminal.(
     for y = 0 to dim_y b - 1 do
       for x = 0 to dim_x b - 1 do
-        print_string [ default ]
+        print_string [ Background White ]
           ((if x = 0 then
             let index = dim_y b - 1 - y in
             (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
            else "")
           ^ " ");
-        let out_char = Square.test_print b.(x).(y) in
-        let my_style =
-          match out_char with
-          | "1" -> [ Background White; Foreground Blue ]
-          | "2" -> [ Background White; Foreground Green ]
-          | "3" -> [ Background White; Foreground Red ]
-          | "4" -> [ Background White; Foreground Cyan ]
-          | "5" -> [ Background White; Foreground Black ]
-          | "6" -> [ Background White; Foreground Magenta ]
-          | "7" -> [ Background White; Foreground Yellow ]
-          | "8" -> [ Foreground White; Background Black ]
-          | _ -> [ default ]
-        in
-        print_string my_style out_char;
-        print_string [ default ] " "
+        pp_loc b (x, y);
+        print_string [ Background White ] " "
       done;
       print_string [ default ] "\n"
     done)
