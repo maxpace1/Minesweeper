@@ -82,4 +82,4 @@ let test_print (sq : t) =
   if sq.is_mine then "*"
   else
     let k = sq.mines_around in
-    if k = 0 then " " else string_of_int k
+    string_of_int k

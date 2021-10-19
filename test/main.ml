@@ -112,7 +112,10 @@ let get_square board (x, y) =
 
 let loc_value_test name board loc out =
   name >:: fun _ ->
-  assert_equal out (get_square board loc) ~printer:Char.escaped
+  assert_equal out
+    (match loc |> get_loc board |> Square.dig |> Square.get_val with
+    | Some i -> i
+    | None -> failwith "Nothing to see here")
 
 let empty_board = set_mines (30, 16) 0 (0, 0)
 
@@ -121,15 +124,15 @@ let mine_board = set_mines (10, 10) 91 (5, 5)
 let board_tests =
   [
     loc_value_test "empty board bottom left corner is 0" empty_board
-      (0, 0) ' ';
+      (0, 0) 0;
     loc_value_test "empty board bottom right corner is 0" empty_board
-      (29, 0) ' ';
-    loc_value_test "empty board top left\n       corner is 0"
-      empty_board (0, 15) ' ';
-    loc_value_test "empty board\n       top right corner is 0"
-      empty_board (29, 15) ' ';
-    loc_value_test "mine board top left corner is *" mine_board (0, 0)
-      '*';
+      (29, 0) 0;
+    loc_value_test "empty board top left corner is 0" empty_board
+      (0, 15) 0;
+    loc_value_test "empty board top right corner is 0" empty_board
+      (29, 15) 0;
+    (* loc_value_test "mine board top left corner is *" mine_board (0,
+       0) '*'; *)
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
   ]
 

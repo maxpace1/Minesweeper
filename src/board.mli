@@ -54,3 +54,6 @@ val pp_board : t -> unit
 
 val to_string : t -> string
 (** TODO REMOVE DEBUG ONLY Pretty prints a board to the console *)
+
+val get_loc : t -> loc -> Square.t
+(** TODO HIDE DEBUG ONLY Pretty prints a board to the console *)
