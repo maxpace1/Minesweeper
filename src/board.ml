@@ -149,7 +149,7 @@ let dig b i =
 let add_x_axis n =
   let str = ref "  +" in
   for x = 0 to n - 1 do
-    str := !str ^ "---"
+    str := !str ^ "-—-"
   done;
   str := !str ^ "\n   ";
   for x = 0 to n - 1 do
