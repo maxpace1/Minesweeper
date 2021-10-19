@@ -11,9 +11,10 @@ type t = {
    square to display to the user if the square has been dug up and is
    not a mine.
 
-   RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false. *)
+   RI: 0 <= [mines_around] <= 8. [is_mine] && [dug_up] false.
+   [flag_mine] && [dug_up] false. *)
 
-exception NoOperationPerformed
+exception NoOperationPerformed of string
 
 exception Explode
 
@@ -24,7 +25,7 @@ let mines_ok mines_around =
 
 let rep_ok t =
   mines_ok t.mines_around;
-  assert (not (t.is_mine && t.dug_up))
+  assert ((not (t.is_mine && t.dug_up)) && not (t.flag_mine && t.dug_up))
 
 let return_rep_ok t =
   rep_ok t;
@@ -44,11 +45,21 @@ let create_square (mine : bool) (around : int) : t =
 
 let flag (sq : t) =
   rep_ok sq;
-  return_rep_ok { sq with flag_mine = not sq.flag_mine }
+  if sq.dug_up then
+    raise
+      (NoOperationPerformed
+         "This square has already been dug up, you cannot flag it!")
+  else return_rep_ok { sq with flag_mine = not sq.flag_mine }
 
 let dig (sq : t) =
   rep_ok sq;
-  if sq.dug_up || sq.flag_mine then raise NoOperationPerformed
+  if sq.dug_up then
+    raise (NoOperationPerformed "This square has already been dug up!")
+  else if sq.flag_mine then
+    raise
+      (NoOperationPerformed
+         "This square is flagged. To dig it up, you must unflag it \
+          first!")
   else if sq.is_mine then raise Explode
   else return_rep_ok { sq with dug_up = true }
 

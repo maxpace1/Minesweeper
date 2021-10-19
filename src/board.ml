@@ -4,7 +4,7 @@ type t = sq_type Array.t Array.t
 
 type loc = int * int
 
-let random = Random.init (int_of_float (Unix.gettimeofday ()))
+let _ = Random.init (int_of_float (Unix.gettimeofday ()))
 
 exception Mine
 
@@ -35,6 +35,13 @@ let check_loc my_board (random_loc : loc) : bool =
 let get_loc my_board (random_loc : loc) =
   assert (check_loc my_board random_loc);
   my_board.(fst random_loc).(snd random_loc)
+
+let get_loc_apply_fun
+    my_board
+    (random_loc : loc)
+    (sq_fun : Square.t -> 'a) =
+  assert (check_loc my_board random_loc);
+  sq_fun (get_loc my_board random_loc)
 
 let generate_adj_pts (my_board : t) (random_loc : loc) : loc list =
   List.filter (check_loc my_board)
@@ -141,11 +148,10 @@ let dig b i =
   rep_ok b;
   b.(fst i).(snd i) <-
     (try Square.dig b.(fst i).(snd i) with
-    | Square.Explode -> raise Mine);
+    | Square.Explode -> raise Mine
+    | Square.NoOperationPerformed -> raise Mine);
   rep_ok b
 
-(* Appends the x-axis to the board. Requires a newline for the axis to
-   be written on *)
 let add_x_axis n =
   let str = ref "  +" in
   for x = 0 to n - 1 do
@@ -157,34 +163,42 @@ let add_x_axis n =
   done;
   !str
 
-let pp_loc b loc =
-  let out_char = Square.get_val b.(fst loc).(snd loc) in
+let pp_color_match process_char =
+  ANSITerminal.(
+    match process_char with
+    | "0" -> [ Background White ]
+    | "1" -> [ Background White; Foreground Blue ]
+    | "2" -> [ Background White; Foreground Green ]
+    | "3" -> [ Background White; Foreground Red ]
+    | "4" -> [ Background White; Foreground Cyan ]
+    | "5" -> [ Background White; Foreground Black ]
+    | "6" -> [ Background White; Foreground Magenta ]
+    | "7" -> [ Background White; Foreground Yellow ]
+    | "8" -> [ Background Black; Foreground White ]
+    | _ -> [ Background Green ])
+
+let pp_single_square_string process_char my_style =
+  ANSITerminal.(
+    let output_chars =
+      if process_char = "🚩" then " " ^ process_char
+      else if process_char <> "0" then " " ^ process_char ^ " "
+      else "   "
+    in
+    print_string (Bold :: my_style) output_chars)
+
+let pp_given_location b loc =
+  let given_sq = b.(fst loc).(snd loc) in
+  let out_char = Square.get_val given_sq in
   let process_char =
     match out_char with
     | Some i -> string_of_int i
-    | None -> " "
+    | None -> if Square.get_flag given_sq then "🚩" else " "
   in
-  ANSITerminal.(
-    let my_style =
-      match process_char with
-      | "0" -> [ Background White ]
-      | "1" -> [ Background White; Foreground Blue ]
-      | "2" -> [ Background White; Foreground Green ]
-      | "3" -> [ Background White; Foreground Red ]
-      | "4" -> [ Background White; Foreground Cyan ]
-      | "5" -> [ Background White; Foreground Black ]
-      | "6" -> [ Background White; Foreground Magenta ]
-      | "7" -> [ Background White; Foreground Yellow ]
-      | "8" -> [ Foreground White; Background Black ]
-      | _ -> [ Background Green ]
-    in
-    if process_char <> "0" then print_string my_style process_char
-    else print_string my_style " ")
+  pp_single_square_string process_char (pp_color_match process_char)
 
-let pp_board_all b =
+let pp_answers b =
   ANSITerminal.(
     for y = 0 to dim_y b - 1 do
-      let was_green = ref false in
       for x = 0 to dim_x b - 1 do
         print_string
           [ Background White; Foreground Black ]
@@ -192,90 +206,31 @@ let pp_board_all b =
            let index = dim_y b - 1 - y in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "");
-        let out_char = Square.test_print b.(x).(y) in
-        let my_style =
-          match out_char with
-          | "0" ->
-              was_green := false;
-              [ Background White ]
-          | "1" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Blue ]
-          | "2" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Green ]
-          | "3" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Red ]
-          | "4" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Cyan ]
-          | "5" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Black ]
-          | "6" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Magenta ]
-          | "7" ->
-              was_green := false;
-              [ Bold; Background White; Foreground Yellow ]
-          | "8" ->
-              was_green := false;
-              [ Bold; Foreground White; Background Black ]
-          | _ ->
-              was_green := true;
-              [ Background Green ]
-        in
-        if !was_green then print_string [ Background Green ] " "
-        else print_string [ Background White ] " ";
-        if out_char <> "0" then print_string my_style out_char
-        else print_string my_style " ";
-        if !was_green then print_string [ Background Green ] " "
-        else print_string [ Background White ] " "
+        pp_single_square_string
+          (Square.test_print b.(x).(y))
+          (pp_color_match (Square.test_print b.(x).(y)))
       done;
       print_string [ default ] "\n"
-    done)
+    done;
+    add_x_axis (dim_x b);
+    print_string [ default ] " \n")
 
 let pp_board b =
-  pp_board_all b;
+  pp_answers b;
+  print_endline "\n\n\n";
   ANSITerminal.(
     for y = 0 to dim_y b - 1 do
       for x = 0 to dim_x b - 1 do
-        print_string [ Background White ]
-          ((if x = 0 then
-            let index = dim_y b - 1 - y in
-            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
-           else "")
-          ^ " ");
-        pp_loc b (x, y);
-        print_string [ Background White ] " "
+        print_string
+          [ Background White; Foreground Black ]
+          (if x = 0 then
+           let index = dim_y b - 1 - y in
+           (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
+          else "");
+        pp_given_location b (x, y)
       done;
       print_string [ default ] "\n"
     done;
-    print_string [ Background White ] (add_x_axis (dim_x b)))
+    add_x_axis (dim_x b))
 
 let to_string b = rep_ok b
-
-(* TODO REMOVE (debug purposes only) *)
-
-let testing_to_string my_board =
-  let ret_str = ref "" in
-  for y = 0 to dim_y my_board - 1 do
-    for x = 0 to dim_x my_board - 1 do
-      let new_str =
-        !ret_str
-        ^ (if x = 0 then
-           let index = dim_y my_board - 1 - y in
-           (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
-          else "")
-        ^ " "
-        ^ Square.test_print my_board.(x).(y)
-        ^ " "
-      in
-      ret_str := new_str
-    done;
-    ret_str := !ret_str ^ "\n"
-  done;
-  !ret_str ^ add_x_axis (dim_x my_board)
-
-let to_string = testing_to_string
