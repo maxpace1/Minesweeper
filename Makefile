@@ -22,6 +22,7 @@ lines:
 	dune clean
 	ocamlbuild -clean
 	cloc --by-file --include-lang=OCaml .
+	make build
 
 zip:
 	rm -f adventure.zip
