@@ -31,6 +31,10 @@ val dig : t -> t
 
 (* Accessing data *)
 
+val ok_checker : t -> t list -> bool
+(** [ok_checker adj_sq] enables some rep_ok functionality in the
+    gameboard. *)
+
 val get_dug : t -> bool
 (** [get_dug sq] checks if [sq] has been dug up yet. *)
 
