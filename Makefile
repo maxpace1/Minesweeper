@@ -28,8 +28,8 @@ lines:
 	make build
 
 zip:
-	rm -f adventure.zip
-	zip -r adventure.zip . -x@exclude.lst
+	rm -f minesweeper.zip
+	zip -r minesweeper.zip . -x@exclude.lst
 
 clean:
 	dune clean
