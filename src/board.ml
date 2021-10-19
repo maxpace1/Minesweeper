@@ -153,19 +153,15 @@ let dig b i =
   rep_ok b
 
 let add_x_axis n =
-  ANSITerminal.(
-    let style = [ Background White; Foreground Black ] in
-    print_string style "  +";
-    for x = 0 to n - 1 do
-      print_string style "---"
-    done;
-    print_string [ default ] "\n";
-    print_string style "   ";
-    for x = 0 to n - 1 do
-      print_string style
-        ((if x < 10 then "0" else "") ^ string_of_int x ^ " ")
-    done;
-    print_string [ default ] "\n")
+  let str = ref "  +" in
+  for x = 0 to n - 1 do
+    str := !str ^ "-—-"
+  done;
+  str := !str ^ "\n   ";
+  for x = 0 to n - 1 do
+    str := !str ^ (if x < 10 then "0" else "") ^ string_of_int x ^ " "
+  done;
+  !str
 
 let pp_color_match process_char =
   ANSITerminal.(
