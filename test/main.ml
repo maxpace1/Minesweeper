@@ -124,10 +124,10 @@ let board_tests =
       (0, 0) ' ';
     loc_value_test "empty board bottom right corner is 0" empty_board
       (29, 0) ' ';
-    loc_value_test "empty board top left\n       corner is 0"
-      empty_board (0, 15) ' ';
-    loc_value_test "empty board\n       top right corner is 0"
-      empty_board (29, 15) ' ';
+    loc_value_test "empty board top left corner is 0" empty_board
+      (0, 15) ' ';
+    loc_value_test "empty board top right corner is 0" empty_board
+      (29, 15) ' ';
     loc_value_test "mine board top left corner is *" mine_board (0, 0)
       '*';
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;

@@ -12,7 +12,8 @@ exception Mine
 
    RI: Each square has a [mines_around] field that accurately represents
    the number of mines surrounding it, and is a valid square as laid out
-   in the square compilation unit. *)
+   in the square compilation unit. Each element in the array must be the
+   same length. The board cannot be empty (i.e. contain no squares) *)
 
 let empty = Array.make_matrix 30 16 Square.blank
 
@@ -57,7 +58,12 @@ let rep_ok b =
         Square.ok_checker (get_loc b each_loc)
           (List.map (get_loc b) (generate_adj_pts b each_loc)))
     done
-  done
+  done;
+  if Array.length b <= 1 then ()
+  else
+    for x = 0 to dim_x b - 2 do
+      assert (Array.length b.(x) = Array.length b.(x + 1))
+    done
 
 let return_rep_ok t =
   rep_ok t;
@@ -137,6 +143,19 @@ let dig b i =
     (try Square.dig b.(fst i).(snd i) with
     | Square.Explode -> raise Mine);
   rep_ok b
+
+(* Appends the x-axis to the board. Requires a newline for the axis to
+   be written on *)
+let add_x_axis str n =
+  str := !str ^ "  +";
+  for x = 0 to n - 1 do
+    str := !str ^ "---"
+  done;
+  str := !str ^ "\n   ";
+  for x = 0 to n - 1 do
+    str := !str ^ (if x < 10 then "0" else "") ^ string_of_int x ^ " "
+  done;
+  !str
 
 let pp_loc b loc =
   let out_char = Square.get_val b.(fst loc).(snd loc) in
@@ -237,19 +256,6 @@ let pp_board b =
 let to_string b = rep_ok b
 
 (* TODO REMOVE (debug purposes only) *)
-
-(* Appends the x-axis to the board. Requires a newline for the axis to
-   be written on *)
-let add_x_axis str n =
-  str := !str ^ "  +";
-  for x = 0 to n - 1 do
-    str := !str ^ "---"
-  done;
-  str := !str ^ "\n   ";
-  for x = 0 to n - 1 do
-    str := !str ^ (if x < 10 then "0" else "") ^ string_of_int x ^ " "
-  done;
-  !str
 
 let testing_to_string my_board =
   let ret_str = ref "" in
