@@ -18,7 +18,9 @@ exception NoOperationPerformed
 exception Explode
 
 let mines_ok mines_around =
-  assert (0 <= mines_around && mines_around <= 8)
+  assert (
+    (*Normal behavior*) (0 <= mines_around && mines_around <= 8)
+    || (*Blank tile*) mines_around = -1)
 
 let rep_ok t =
   mines_ok t.mines_around;
@@ -29,13 +31,12 @@ let return_rep_ok t =
   t
 
 let blank : t =
-  return_rep_ok
-    {
-      mines_around = -1;
-      is_mine = false;
-      flag_mine = false;
-      dug_up = false;
-    }
+  {
+    mines_around = -1;
+    is_mine = false;
+    flag_mine = false;
+    dug_up = false;
+  }
 
 let create_square (mine : bool) (around : int) : t =
   mines_ok around;
