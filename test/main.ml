@@ -54,51 +54,48 @@ let get_val_test
 
 let square_tests =
   [
-    ( "value of blank square should be None" >:: fun _ ->
+    ( "get_val of blank square is None" >:: fun _ ->
       assert_equal None (get_val blank) );
     create_square_test
-      "value of square created from create_square should return None \
-       for a square that is not a mine"
-      false 1 None;
-    create_square_test
-      "value of square created from create_square should return None \
-       for a square that is a mine"
+      "get_val of undug square that is not a mine is None" false 1 None;
+    create_square_test "get_val of undug square that is a mine is None"
       true 1 None;
     create_square_test
-      "value of square created from create_square should return None \
-       when there are more than 1 mine around the square"
-      false 10 None;
-    flag_test "blank square should become marked when flagged" blank
-      true;
-    flag_test "unmarked square should become marked when flagged" square
-      true;
-    flag_test "marked square should become unmarked when flagged"
+      "get_val of undug square that has mines surrounding is None" false
+      8 None;
+    flag_test "blank square becomes marked when flagged" blank true;
+    flag_test "unmarked square becomes marked when flagged" square true;
+    flag_test "marked square becomes unmarked when flagged"
       marked_square false;
-    flag_test "unmarked mine should become marked when flagged" mine
-      true;
-    flag_test "marked mine should become unmarked when flagged"
-      marked_mine false;
-    exception_dig_test "should raise Explode if a mine is dug up"
-      Explode mine;
+    flag_test "unmarked mine becomes marked when flagged" mine true;
+    flag_test "marked mine becomes unmarked when flagged" marked_mine
+      false;
+    exception_dig_test "raises Explode if a mine is dug up" Explode mine;
     exception_dig_test
-      "should raise NoOperationPerformed if a dug up square is dug up"
+      "raises NoOperationPerformed if a dug up square is dug up"
       NoOperationPerformed dug_square;
     exception_dig_test
-      "should raise NoOperationPerformed if a flagged square is dug up"
+      "raises NoOperationPerformed if a flagged non-mine square is dug \
+       up"
       NoOperationPerformed marked_square;
     exception_dig_test
-      "should raise NoOperationPerformed if a flagged mine is dug up"
+      "raises NoOperationPerformed if a flagged mine is dug up"
       NoOperationPerformed marked_mine;
-    dig_test "blank sqaure should become dug when dug" blank true;
-    dig_test "undug sqaure should become dug when dug" square true;
-    get_val_test "value of blank square should be None" blank None;
-    get_val_test "value of square not dug up should be None" square None;
-    get_val_test "value of a mine should be None" mine None;
-    get_val_test "value of a dug square with around 0 should be 0"
+    dig_test "blank square becomes dug when dug" blank true;
+    dig_test "undug square becomes dug when dug" square true;
+    get_val_test "get_val of value of blank square should be None" blank
+      None;
+    get_val_test "get_val of value of square not dug up should be None"
+      square None;
+    get_val_test "get_val of value of a mine should be None" mine None;
+    get_val_test
+      "get_val of value of a dug square with around 0 should be 0"
       dug_square_0 (Some 0);
-    get_val_test "value of a dug square with around 0 should be 3"
+    get_val_test
+      "get_val of value of a dug square with around 0 should be 3"
       dug_square_3 (Some 3);
-    get_val_test "value of a dug square with around 0 should be 8"
+    get_val_test
+      "get_val of value of a dug square with around 0 should be 8"
       dug_square_8 (Some 8);
   ]
 
@@ -109,7 +106,9 @@ let exc_test name f arg exc =
 
 let get_square board (x, y) =
   String.get (to_string board)
-    ((x * 3) + 3 + ((dim_y board - 1 - y) * ((dim_x board * 3) + 3 + 1)))
+    ((x * 3) + 3
+    + ((dim_y board - 1 - y) * ((dim_x board * 3) + 3 + 1))
+    + 1)
 
 let loc_value_test name board loc out =
   name >:: fun _ ->
@@ -127,11 +126,16 @@ let mine_board =
 
 let board_tests =
   [
-    loc_value_test "empty board bl corner is 0" empty_board (0, 0) '0';
-    loc_value_test "empty board br corner is 0" empty_board (29, 0) '0';
-    loc_value_test "empty board tl corner is 0" empty_board (0, 15) '0';
-    loc_value_test "empty board tr corner is 0" empty_board (29, 15) '0';
-    loc_value_test "mine board bl corner is *" mine_board (0, 0) '*';
+    loc_value_test "empty board bottom left corner is 0" empty_board
+      (0, 0) '0';
+    loc_value_test "empty board bottom right corner is 0" empty_board
+      (29, 0) '0';
+    loc_value_test "empty board top left corner is 0" empty_board
+      (0, 15) '0';
+    loc_value_test "empty board top right corner is 0" empty_board
+      (29, 15) '0';
+    loc_value_test "mine board top left corner is *" mine_board (0, 0)
+      '*';
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
   ]
 
