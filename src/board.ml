@@ -149,19 +149,23 @@ let dig b i =
   b.(fst i).(snd i) <-
     (try Square.dig b.(fst i).(snd i) with
     | Square.Explode -> raise Mine
-    | Square.NoOperationPerformed -> raise Mine);
+    | Square.NoOperationPerformed s -> raise Mine);
   rep_ok b
 
 let add_x_axis n =
-  let str = ref "  +" in
-  for x = 0 to n - 1 do
-    str := !str ^ "-—-"
-  done;
-  str := !str ^ "\n   ";
-  for x = 0 to n - 1 do
-    str := !str ^ (if x < 10 then "0" else "") ^ string_of_int x ^ " "
-  done;
-  !str
+  ANSITerminal.(
+    let style = [ Background White; Foreground Black ] in
+    print_string style "  +";
+    for x = 0 to n - 1 do
+      print_string style "---"
+    done;
+    print_string [ default ] "\n";
+    print_string style "   ";
+    for x = 0 to n - 1 do
+      print_string style
+        ((if x < 10 then "0" else "") ^ string_of_int x ^ " ")
+    done;
+    print_string [ default ] "\n")
 
 let pp_color_match process_char =
   ANSITerminal.(
@@ -232,5 +236,3 @@ let pp_board b =
       print_string [ default ] "\n"
     done;
     add_x_axis (dim_x b))
-
-let to_string b = rep_ok b

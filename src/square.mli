@@ -5,7 +5,7 @@
 type t
 (** The abstract type of value representing a place on the gameboard. *)
 
-exception NoOperationPerformed
+exception NoOperationPerformed of string
 
 exception Explode
 

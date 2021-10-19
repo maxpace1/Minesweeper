@@ -73,14 +73,21 @@ let square_tests =
     exception_dig_test "raises Explode if a mine is dug up" Explode mine;
     exception_dig_test
       "raises NoOperationPerformed if a dug up square is dug up"
-      NoOperationPerformed dug_square;
+      (NoOperationPerformed "This square has already been dug up!")
+      dug_square;
     exception_dig_test
       "raises NoOperationPerformed if a flagged non-mine square is dug \
        up"
-      NoOperationPerformed flagged_square;
+      (NoOperationPerformed
+         "This square is flagged. To dig it up, you must unflag it \
+          first!")
+      flagged_square;
     exception_dig_test
       "raises NoOperationPerformed if a flagged mine is dug up"
-      NoOperationPerformed flagged_mine;
+      (NoOperationPerformed
+         "This square is flagged. To dig it up, you must unflag it \
+          first!")
+      flagged_mine;
     dig_test "blank square becomes dug when dug" blank true;
     dig_test "undug square becomes dug when dug" square true;
     get_val_test "get_val of value of blank square should be None" blank
