@@ -138,7 +138,34 @@ let dig b i =
     | Square.Explode -> raise Mine);
   rep_ok b
 
-let pp_board b = failwith "Unimplemented"
+let pp_board b =
+  ANSITerminal.(
+    for y = 0 to dim_y b - 1 do
+      for x = 0 to dim_x b - 1 do
+        print_string [ default ]
+          ((if x = 0 then
+            let index = dim_y b - 1 - y in
+            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
+           else "")
+          ^ " ");
+        let out_char = Square.test_print b.(x).(y) in
+        let my_style =
+          match out_char with
+          | "1" -> [ Background White; Foreground Blue ]
+          | "2" -> [ Background White; Foreground Green ]
+          | "3" -> [ Background White; Foreground Red ]
+          | "4" -> [ Background White; Foreground Cyan ]
+          | "5" -> [ Background White; Foreground Black ]
+          | "6" -> [ Background White; Foreground Magenta ]
+          | "7" -> [ Background White; Foreground Yellow ]
+          | "8" -> [ Foreground White; Background Black ]
+          | _ -> [ default ]
+        in
+        print_string my_style out_char;
+        print_string [ default ] " "
+      done;
+      print_string [ default ] "\n"
+    done)
 
 let to_string b = rep_ok b
 
