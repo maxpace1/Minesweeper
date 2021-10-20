@@ -209,8 +209,6 @@ let board_tests =
       (0, 15) 0;
     loc_value_test "empty board top right corner is 0" empty_board
       (29, 15) 0;
-    (* loc_value_test "mine board top left corner is *" mine_board (0,
-       0) '*'; *)
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
     exc_test "digging a dug square should raise failure"
       (dig empty_board) (5, 5)
