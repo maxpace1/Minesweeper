@@ -170,6 +170,8 @@ let loc_value_test name board loc out =
 
 let empty_board = set_mines (30, 16) 0 (0, 0)
 
+let random_board = set_mines (30, 16) 99 (15, 8)
+
 let _ = flag empty_board (1, 1)
 
 let _ = dig empty_board (5, 5)
@@ -230,11 +232,21 @@ let board_tests =
       empty_board (1, 1) false;
     dig_test "digging undig square should mark it as dug" empty_board
       (2, 2) true;
-    ( "test to output pretty printed board" >:: fun _ ->
+    ( "test to output pretty printed empty board" >:: fun _ ->
+      print_endline "\n\n";
       pp_board empty_board;
       assert true );
-    ( "test to output pretty printed board" >:: fun _ ->
+    ( "test to output answers pretty printed empty board" >:: fun _ ->
+      print_endline "\n\n";
       pp_answers empty_board;
+      assert true );
+    ( "test to output pretty printed random board" >:: fun _ ->
+      print_endline "\n\n";
+      pp_board random_board;
+      assert true );
+    ( "test to output answers pretty printed random board" >:: fun _ ->
+      print_endline "\n\n";
+      pp_answers random_board;
       assert true );
   ]
 

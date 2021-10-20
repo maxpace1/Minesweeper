@@ -7,7 +7,7 @@ utop:
 	OCAMLRUNPARAM=b dune utop src
 
 test:
-	dune exec --instrument-with bisect_ppx test/main.exe
+	dune exec --instrument-with bisect_ppx test/main.exe -- -runner sequential
 
 demo.1:
 	OCAMLRUNPARAM=b dune exec demo1/main.exe
