@@ -141,7 +141,9 @@ let set_mines my_board_dim number_mines start_loc =
 
 let flag b (i : loc) =
   rep_ok b;
-  b.(fst i).(snd i) <- Square.flag b.(fst i).(snd i);
+  b.(fst i).(snd i) <-
+    (try Square.flag b.(fst i).(snd i) with
+    | Square.NoOperationPerformed s -> failwith s);
   rep_ok b
 
 let dig b i =
@@ -149,7 +151,7 @@ let dig b i =
   b.(fst i).(snd i) <-
     (try Square.dig b.(fst i).(snd i) with
     | Square.Explode -> raise Mine
-    | Square.NoOperationPerformed s -> raise Mine);
+    | Square.NoOperationPerformed s -> failwith s);
   rep_ok b
 
 let add_x_axis n =

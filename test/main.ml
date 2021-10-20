@@ -4,7 +4,7 @@ open Square
 
 (** square configuations *)
 
-let create_valid_square x = create_square false x |> dig
+let create_dug_square x = create_square false x |> dig
 
 let mine = create_square true 1
 
@@ -16,11 +16,11 @@ let flagged_square = mine |> flag
 
 let dug_square = square |> dig
 
-let dug_square_0 = create_valid_square 0
+let dug_square_0 = create_dug_square 0
 
-let dug_square_3 = create_valid_square 3
+let dug_square_3 = create_dug_square 3
 
-let dug_square_8 = create_valid_square 8
+let dug_square_8 = create_dug_square 8
 
 let create_square_test
     (name : string)
@@ -38,13 +38,26 @@ let square_op_test
     (expected_output : bool) : test =
   name >:: fun _ -> assert_equal expected_output (op square |> test)
 
-let exception_dig_test (name : string) (ex : exn) (square : Square.t) :
-    test =
-  name >:: fun _ -> assert_raises ex (fun () -> dig square)
+let exception_test
+    (func : Square.t -> Square.t)
+    (name : string)
+    (ex : exn)
+    (square : Square.t) : test =
+  name >:: fun _ -> assert_raises ex (fun () -> func square)
+
+let exception_dig_test = exception_test dig
+
+let exception_flag_test = exception_test flag
 
 let flag_test = square_op_test flag get_flag
 
 let dig_test = square_op_test dig get_dug
+
+let test_print
+    (name : string)
+    (square : Square.t)
+    (expected_output : string) : test =
+  name >:: fun _ -> assert_equal expected_output (test_print square)
 
 let get_val_test
     (name : string)
@@ -70,6 +83,11 @@ let square_tests =
     flag_test "unflagged mine becomes marked when flagged" mine true;
     flag_test "flagged mine becomes unmarked when flagged" flagged_mine
       false;
+    exception_flag_test
+      "raise NoOperationPerformed if a dug up square is flagged"
+      (NoOperationPerformed
+         "This square has already been dug up, you cannot flag it!")
+      dug_square_0;
     exception_dig_test "raises Explode if a mine is dug up" Explode mine;
     exception_dig_test
       "raises NoOperationPerformed if a dug up square is dug up"
@@ -104,6 +122,11 @@ let square_tests =
     get_val_test
       "get_val of value of a dug square with around 0 should be 8"
       dug_square_8 (Some 8);
+    test_print "mine should be represented as a *" mine "*";
+    test_print
+      "non-mine squares should be represented with the number of mines \
+       around it"
+      dug_square_3 "3";
   ]
 
 open Board
@@ -149,19 +172,31 @@ let empty_board = set_mines (30, 16) 0 (0, 0)
 
 let _ = flag empty_board (1, 1)
 
+let _ = dig empty_board (5, 5)
+
 let mine_board = set_mines (10, 10) 91 (5, 5)
 
 let generate_board =
+  print_endline
+    "Generating random boards to test invariants. Please wait.";
   let dim_x = Random.int 90 + 10 in
   let dim_y = Random.int 90 + 10 in
   let mines = Random.int ((dim_x * dim_y) - 9) in
   let start_loc = (Random.int dim_x, Random.int dim_y) in
   for i = 0 to 1000 do
+    if i = 250 then print_endline "250/1000"
+    else if i = 500 then print_endline "500/1000"
+    else if i = 750 then print_endline "750/1000"
+    else if i = 1000 then print_endline "Done. 1000/1000";
     set_mines (dim_x, dim_y) mines start_loc |> ignore
   done
 
 let board_tests =
   [
+    ( "custom empty should raise Failure with invalid dimensions"
+    >:: fun _ ->
+      assert_raises (Failure "Bad Size Arguments") (fun () ->
+          custom_empty 5 100) );
     custom_empty_test "custom square board gets dimensions correctly" 10
       10 (10, 10);
     custom_empty_test "custom nonsquare board gets dimensions correctly"
@@ -177,6 +212,18 @@ let board_tests =
     (* loc_value_test "mine board top left corner is *" mine_board (0,
        0) '*'; *)
     exc_test "dig mine raises Mine" (dig mine_board) (0, 0) Mine;
+    exc_test "digging a dug square should raise failure"
+      (dig empty_board) (5, 5)
+      (Failure "This square has already been dug up!");
+    exc_test "digging a flagged square should raise failure"
+      (dig empty_board) (1, 1)
+      (Failure
+         "This square is flagged. To dig it up, you must unflag it \
+          first!");
+    exc_test "flagging a dug up square should raise failure"
+      (flag empty_board) (5, 5)
+      (Failure
+         "This square has already been dug up, you cannot flag it!");
     ( "empty board should have default size of 30 by 16" >:: fun _ ->
       assert_equal (empty |> dim_x, empty |> dim_y) (30, 16) );
     flag_test "flagging unflagged square should mark it as flagged"
@@ -185,6 +232,12 @@ let board_tests =
       empty_board (1, 1) false;
     dig_test "digging undig square should mark it as dug" empty_board
       (2, 2) true;
+    ( "test to output pretty printed board" >:: fun _ ->
+      pp_board empty_board;
+      assert true );
+    ( "test to output pretty printed board" >:: fun _ ->
+      pp_answers empty_board;
+      assert true );
   ]
 
 let suite =

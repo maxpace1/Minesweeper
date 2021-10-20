@@ -17,11 +17,14 @@ val blank : t
 val create_square : bool -> int -> t
 (** [create_square mine around] creates a square. [is_mine] represents
     if the square itself is a mine, and [around] represents the number
-    of squares around it that are mines.*)
+    of squares around it that are mines. By default, the square starts
+    out undug and unflagged. *)
 
 val flag : t -> t
 (** [flag sq] flips the status of the flagged square i.e. a flagged [sq]
-    becomes unflagged, and an unflagged [sq] becomes flagged. *)
+    becomes unflagged, and an unflagged [sq] becomes flagged. Attempting
+    to flag a [sq] that has already been dug up will raise
+    [NoOperationPerformed]*)
 
 val dig : t -> t
 (** [dig sq] "digs up" a square. Attempting to dig up [sq] if it has
