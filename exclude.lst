@@ -7,3 +7,6 @@ demo/*
 .ocamlformat
 .ocamlinit
 *.pdf
+_coverage/*
+demo1/*
+*.coverage
