@@ -57,6 +57,8 @@ let generate_adj_pts (my_board : t) (random_loc : loc) : loc list =
     ]
 
 let rep_ok b =
+  assert (
+    10 <= dim_x b && dim_x b <= 99 && 10 <= dim_y b && dim_y b <= 99);
   for y = 0 to dim_y b - 1 do
     for x = 0 to dim_x b - 1 do
       let each_loc = (x, y) in
@@ -123,35 +125,48 @@ let rec set_repeat_mines
       set_repeat_mines my_board (number_mines - 1) acc bad_loc)
 
 let set_mines my_board_dim number_mines start_loc =
-  assert (
-    number_mines >= 0
-    && number_mines <= (fst my_board_dim * snd my_board_dim) - 9);
+  if
+    10 <= fst my_board_dim
+    && fst my_board_dim <= 99
+    && 10 <= snd my_board_dim
+    && snd my_board_dim <= 99
+  then (
+    assert (
+      number_mines >= 0
+      && number_mines <= (fst my_board_dim * snd my_board_dim) - 9);
 
-  let my_board = custom_empty (fst my_board_dim) (snd my_board_dim) in
-  rep_ok my_board;
-  if check_loc my_board start_loc then
-    let off_limits = generate_adj_pts my_board start_loc in
-    let mine_locs =
-      set_repeat_mines my_board number_mines
-        (Array.make_matrix (dim_x my_board) (dim_y my_board) false)
-        (start_loc :: off_limits)
-    in
-    return_rep_ok (copy_mines my_board mine_locs)
-  else failwith "Invalid start position"
+    let my_board = custom_empty (fst my_board_dim) (snd my_board_dim) in
+    rep_ok my_board;
+    if check_loc my_board start_loc then
+      let off_limits = generate_adj_pts my_board start_loc in
+      let mine_locs =
+        set_repeat_mines my_board number_mines
+          (Array.make_matrix (dim_x my_board) (dim_y my_board) false)
+          (start_loc :: off_limits)
+      in
+      return_rep_ok (copy_mines my_board mine_locs)
+    else failwith "Invalid start position")
+  else failwith "Bad Size Arguments"
 
 let flag b (i : loc) =
   rep_ok b;
   b.(fst i).(snd i) <-
     (try Square.flag b.(fst i).(snd i) with
-    | Square.NoOperationPerformed s -> failwith s);
+    | Square.NoOperationPerformed s ->
+        print_endline s;
+        get_loc b i);
   rep_ok b
 
 let dig b i =
   rep_ok b;
   b.(fst i).(snd i) <-
     (try Square.dig b.(fst i).(snd i) with
-    | Square.Explode -> raise Mine
-    | Square.NoOperationPerformed s -> failwith s);
+    | Square.Explode ->
+        print_endline "You dug up a mine! Game over\n";
+        raise Mine
+    | Square.NoOperationPerformed s ->
+        print_endline s;
+        get_loc b i);
   rep_ok b
 
 let add_x_axis n =
@@ -209,12 +224,13 @@ let pp_answers b =
         print_string
           [ Background White; Foreground Black ]
           (if x = 0 then
-           let index = dim_y b - 1 - y in
+           let index = dim_y b - y - 1 in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "");
         pp_single_square_string
-          (Square.test_print b.(x).(y))
-          (pp_color_match (Square.test_print b.(x).(y)))
+          (Square.test_print (get_loc b (x, dim_y b - y - 1)))
+          (pp_color_match
+             (Square.test_print (get_loc b (x, dim_y b - y - 1))))
       done;
       print_string [ default ] "\n"
     done;
@@ -222,18 +238,17 @@ let pp_answers b =
     print_string [ default ] " \n")
 
 let pp_board b =
-  pp_answers b;
-  print_endline "\n\n\n";
+  print_endline "\n";
   ANSITerminal.(
     for y = 0 to dim_y b - 1 do
       for x = 0 to dim_x b - 1 do
         print_string
           [ Background White; Foreground Black ]
           (if x = 0 then
-           let index = dim_y b - 1 - y in
+           let index = dim_y b - y - 1 in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "");
-        pp_given_location b (x, y)
+        pp_given_location b (x, dim_y b - y - 1)
       done;
       print_string [ default ] "\n"
     done;
