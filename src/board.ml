@@ -152,22 +152,45 @@ let flag b (i : loc) =
   rep_ok b;
   b.(fst i).(snd i) <-
     (try Square.flag b.(fst i).(snd i) with
-    | Square.NoOperationPerformed s ->
-        print_endline s;
-        get_loc b i);
+    | Square.NoOperationPerformed s -> failwith s);
   rep_ok b
 
-let dig b i =
+let ok_dig_around b (i : loc) =
   rep_ok b;
+  assert (check_loc b i);
+  let sq = get_loc b i in
+  match Square.get_val sq with
+  | None -> false
+  | Some int_val ->
+      int_val
+      = (generate_adj_pts b i
+        |> List.map (get_loc b)
+        |> List.filter Square.get_flag
+        |> List.length)
+
+let rec dig b (i : loc) =
+  rep_ok b;
+  assert (check_loc b i);
+  let sq = get_loc b i in
   b.(fst i).(snd i) <-
-    (try Square.dig b.(fst i).(snd i) with
-    | Square.Explode ->
-        print_endline "You dug up a mine! Game over\n";
-        raise Mine
-    | Square.NoOperationPerformed s ->
-        print_endline s;
-        get_loc b i);
+    (try Square.dig sq with
+    | Square.Explode -> raise Mine
+    | Square.NoOperationPerformed s -> failwith s);
+  rep_ok b;
+  dig_around b i;
   rep_ok b
+
+and has_dug b i = get_loc b i |> Square.get_dug |> not
+
+and dig_around b i =
+  if ok_dig_around b i then
+    ignore
+      (generate_adj_pts b i
+      |> List.filter (check_loc b)
+      |> List.filter (has_dug b)
+      |> List.map (fun my_loc ->
+             if has_dug b my_loc then dig b my_loc else ()))
+  else ()
 
 let add_x_axis n =
   ANSITerminal.(
