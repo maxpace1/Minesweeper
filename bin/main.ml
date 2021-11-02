@@ -32,53 +32,9 @@ let rec output_input_func_pair
           output_input_func_pair instructions default func_operate
             error_msg)
 
-let rec move (board : Board.t) =
-  (*Unix.gettimeofday () -. float_of_int board.start_time |>
-    int_of_float |> string_of_int |> print_endline;*)
-  print_endline
-    "\nEnter the location you would like to perform your move";
-  print_string "> ";
-  let pos = read_line () in
-  let point = parse_pair pos in
-  print_endline
-    "\n\
-     Enter the move you would like to perform at this location (dig, \
-     flag, quit)";
-  print_string "> ";
-  match read_line () with
-  | "flag" ->
-      (try Board.flag board point with
-      | Failure f -> print_endline f);
-      Board.pp_board board;
-      move board
-  | "dig" ->
-      (try Board.dig board point with
-      | Mine ->
-          Board.pp_answers board;
-          quit "There was a mine in this square! You lose!"
-      | Failure f -> print_endline f);
-      Board.pp_board board;
-      move board
-  | "quit" -> quit "Quitting!"
-  | _ ->
-      print_endline "Invalid move";
-      Board.pp_board board;
-      move board
-
-(** [start_game start_size start_loc num_mines] takes in a gameboard
-    size, starting location, number of mines and kicks off the game *)
-let rec start_game
-    (size : int * int)
-    (loc : int * int)
-    (num_mines : int) =
-  let board = Board.set_mines size num_mines loc in
-  Board.dig board loc;
-  Board.pp_board board;
-  move board
-
 (** [inputs_game start_size] takes in a gameboard size and gets user
     desired factors like starting location and load factor *)
-and input_game (start_size : int * int) =
+let rec input_game (start_size : int * int) =
   let default_pos = (fst start_size / 2, snd start_size / 2) in
   let x, y =
     output_input_func_pair
@@ -86,13 +42,13 @@ and input_game (start_size : int * int) =
        or enter \"default\" for the default location.\n"
       default_pos Fun.id "Malformed input."
   in
-  print_string
+  print_endline
     "\n\
      Please enter the number of mines to be on the board or \
      \"default\" for the default ratio. \n\
      Note that the number of mines must be at least 1 and no more than ";
   print_int ((fst start_size * snd start_size) - 9);
-  print_endline ".";
+  print_endline ".\n";
   print_string "> ";
   let mines =
     match read_line () with
@@ -105,13 +61,63 @@ and input_game (start_size : int * int) =
     | otherwise -> (
         try
           let input = String.trim otherwise |> int_of_string in
-          if input > 0 && input < (fst start_size * snd start_size) - 9
+          if input > 0 && input <= (fst start_size * snd start_size) - 9
           then input
           else failwith "Out of bounds"
         with
         | _ -> quit "Malformed input. Quitting game")
   in
   start_game start_size (x, y) mines
+
+(** [start_game start_size start_loc num_mines] takes in a gameboard
+    size, starting location, number of mines and kicks off the game *)
+and start_game (size : int * int) (loc : int * int) (num_mines : int) =
+  let board = Board.set_mines size num_mines loc in
+  Board.dig board loc;
+  Board.pp_board board;
+  move board
+
+and move (board : Board.t) =
+  print_endline
+    "\nEnter the location you would like to perform your move";
+  print_string "> ";
+  let pos = read_line () in
+  if pos = "quit" then quit "Quitting!";
+  let point =
+    try parse_pair pos with
+    | Failure f -> (-1, -1)
+  in
+  print_endline
+    "\n\
+     Enter the move you would like to perform at this location (dig, \
+     flag, quit)\n";
+  print_string "> ";
+  match read_line () with
+  | "flag" ->
+      (try Board.flag board point with
+      | Failure f -> print_endline f
+      | Invalid_argument s -> print_endline s);
+      Board.pp_board board;
+      move board
+  | "dig" ->
+      (try Board.dig board point with
+      | Mine -> (
+          Board.pp_answers board;
+          print_endline "There was a mine in this square! You lose!";
+          print_endline "\nWould you like to play again (yes or no)?";
+          print_string "> ";
+          match read_line () with
+          | "yes" -> main ()
+          | _ -> quit "Quitting!")
+      | Failure f -> print_endline f
+      | Invalid_argument s -> print_endline s);
+      Board.pp_board board;
+      move board
+  | "quit" -> quit "Quitting!"
+  | _ ->
+      print_endline "Invalid move";
+      Board.pp_board board;
+      move board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 and main () =
