@@ -9,6 +9,10 @@ utop:
 test:
 	dune exec --instrument-with bisect_ppx test/main.exe -- -runner sequential
 
+play:
+	OCAMLRUNPARAM=b dune exec bin/main.exe
+
+
 demo.1:
 	clear
 	OCAMLRUNPARAM=b dune exec demo1/main.exe
