@@ -238,29 +238,20 @@ let ok_dig_around b (i : loc) =
         |> List.filter Square.get_flag
         |> List.length)
 
-let rec dig b (i : loc) =
-  rep_ok b;
-   (check_loc b i);
-  let sq = get_loc b i in
-  b.(fst i).(snd i) <-
-    (try Square.dig sq with
-    | Square.Explode -> raise Mine
-    | Square.NoOperationPerformed s -> failwith s);
-  rep_ok b;
-  dig_around b i;
-  rep_ok b
 let rec dig (b : t) (i : loc) =
   around_rep_ok b;
-  assert (check_loc b.game_board i);
-  let sq = get_loc b.game_board i in
-  b.game_board.(fst i).(snd i) <-
-    (try Square.dig sq with
-    | Square.Explode -> raise Mine
-    | Square.NoOperationPerformed s -> failwith s);
-  b.squares_left <- b.squares_left - 1;
-  around_rep_ok b;
-  dig_around b i;
-  around_rep_ok b
+  if not (check_loc b.game_board i) then
+    raise (Invalid_argument "Invalid location on the board!")
+  else
+    let sq = get_loc b.game_board i in
+    b.game_board.(fst i).(snd i) <-
+      (try Square.dig sq with
+      | Square.Explode -> raise Mine
+      | Square.NoOperationPerformed s -> failwith s);
+    b.squares_left <- b.squares_left - 1;
+    around_rep_ok b;
+    dig_around b i;
+    around_rep_ok b
 
 and has_dug b i = get_loc b i |> Square.get_dug |> not
 
