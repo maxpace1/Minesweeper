@@ -1,10 +1,18 @@
 type sq_type = Square.t
 
-type t = sq_type Array.t Array.t
+type gameboard = sq_type Array.t Array.t
+
+type t = {
+  game_board : gameboard;
+  mutable squares_left : int;
+  mines : int;
+}
 
 type loc = int * int
 
 let _ = Random.init (int_of_float (Unix.gettimeofday ()))
+
+let rep_ok_on = true
 
 exception Mine
 
@@ -15,24 +23,37 @@ exception Mine
    in the square compilation unit. Each element in the array must be the
    same length. The board cannot be empty (i.e. contain no squares) *)
 
-let empty = Array.make_matrix 30 16 Square.blank
+let empty : t =
+  {
+    game_board = Array.make_matrix 30 16 Square.blank;
+    squares_left = 480;
+    mines = 0;
+  }
 
-let custom_empty x y =
+let custom_empty x y : t =
   if 10 <= x && x <= 99 && 10 <= y && y <= 99 then
-    Array.make_matrix x y Square.blank
+    {
+      game_board = Array.make_matrix x y Square.blank;
+      squares_left = x * y;
+      mines = 0;
+    }
   else failwith "Bad Size Arguments"
 
-let dim_x b = Array.length b
+let internal_dim_x b = Array.length b
 
-let dim_y b = Array.length b.(0)
+let internal_dim_y b = Array.length b.(0)
 
-let check_loc my_board (random_loc : loc) : bool =
+let dim_x (b : t) = internal_dim_x b.game_board
+
+let dim_y (b : t) = internal_dim_y b.game_board
+
+let check_loc (my_board : 'a array array) (random_loc : loc) : bool =
   0 <= fst random_loc
-  && fst random_loc < dim_x my_board
+  && fst random_loc < internal_dim_x my_board
   && 0 <= snd random_loc
-  && snd random_loc < dim_y my_board
+  && snd random_loc < internal_dim_y my_board
 
-let get_loc my_board (random_loc : loc) =
+let get_loc (my_board : 'a array array) (random_loc : loc) =
   assert (check_loc my_board random_loc);
   my_board.(fst random_loc).(snd random_loc)
 
@@ -40,10 +61,11 @@ let get_loc_apply_fun
     my_board
     (random_loc : loc)
     (sq_fun : Square.t -> 'a) =
-  assert (check_loc my_board random_loc);
-  sq_fun (get_loc my_board random_loc)
+  assert (check_loc my_board.game_board random_loc);
+  sq_fun (get_loc my_board.game_board random_loc)
 
-let generate_adj_pts (my_board : t) (random_loc : loc) : loc list =
+let generate_adj_pts (my_board : gameboard) (random_loc : loc) :
+    loc list =
   List.filter (check_loc my_board)
     [
       (1 + fst random_loc, 0 + snd random_loc);
@@ -56,33 +78,70 @@ let generate_adj_pts (my_board : t) (random_loc : loc) : loc list =
       (1 + fst random_loc, -1 + snd random_loc);
     ]
 
-let rep_ok b =
-  assert (
-    10 <= dim_x b && dim_x b <= 99 && 10 <= dim_y b && dim_y b <= 99);
-  for y = 0 to dim_y b - 1 do
-    for x = 0 to dim_x b - 1 do
-      let each_loc = (x, y) in
-      assert (check_loc b each_loc);
-      assert (
-        Square.ok_checker (get_loc b each_loc)
-          (List.map (get_loc b) (generate_adj_pts b each_loc)))
-    done
-  done;
-  if Array.length b <= 1 then ()
-  else
-    for x = 0 to dim_x b - 2 do
-      assert (Array.length b.(x) = Array.length b.(x + 1))
-    done
+(** TODO check that squares left equals the number of squares that have
+    not been dug up yet*)
+let around_rep_ok (b : t) =
+  if rep_ok_on then (
+    assert (
+      10 <= internal_dim_x b.game_board
+      && internal_dim_x b.game_board <= 99
+      && 10 <= internal_dim_y b.game_board
+      && internal_dim_y b.game_board <= 99);
+    for y = 0 to internal_dim_y b.game_board - 1 do
+      for x = 0 to internal_dim_x b.game_board - 1 do
+        let each_loc = (x, y) in
+        assert (check_loc b.game_board each_loc);
+        assert (
+          Square.ok_checker
+            (get_loc b.game_board each_loc)
+            (List.map (get_loc b.game_board)
+               (generate_adj_pts b.game_board each_loc)))
+      done
+    done;
+    if Array.length b.game_board <= 1 then ()
+    else
+      for x = 0 to internal_dim_x b.game_board - 2 do
+        assert (
+          Array.length b.game_board.(x)
+          = Array.length b.game_board.(x + 1))
+      done)
+  else assert true
+
+let squares_left_rep_ok (b : t) =
+  if rep_ok_on then (
+    assert (
+      0 <= b.squares_left
+      && b.squares_left
+         <= internal_dim_x b.game_board * internal_dim_y b.game_board);
+    let expected_dug_left =
+      (internal_dim_x b.game_board * internal_dim_y b.game_board)
+      - b.squares_left - b.mines
+    in
+    assert (
+      Array.(b.game_board |> to_list |> concat |> to_list)
+      |> List.filter Square.get_dug
+      |> List.length = expected_dug_left))
+  else assert true
+
+let rep_ok (b : t) =
+  if rep_ok_on then around_rep_ok b;
+  squares_left_rep_ok b
 
 let return_rep_ok t =
   rep_ok t;
   t
 
-let calculate_mines (my_board : t) (is_mine : bool Array.t Array.t) :
-    int Array.t Array.t =
-  let ret_arr = Array.make_matrix (dim_x my_board) (dim_y my_board) 0 in
-  for x = 0 to dim_x my_board - 1 do
-    for y = 0 to dim_y my_board - 1 do
+let calculate_mines
+    (my_board : gameboard)
+    (is_mine : bool Array.t Array.t) : int Array.t Array.t =
+  let ret_arr =
+    Array.make_matrix
+      (internal_dim_x my_board)
+      (internal_dim_y my_board)
+      0
+  in
+  for x = 0 to internal_dim_x my_board - 1 do
+    for y = 0 to internal_dim_y my_board - 1 do
       ret_arr.(x).(y) <-
         List.fold_left
           (fun acc (x, y) -> if is_mine.(x).(y) then acc + 1 else acc)
@@ -92,10 +151,11 @@ let calculate_mines (my_board : t) (is_mine : bool Array.t Array.t) :
   done;
   ret_arr
 
-let copy_mines (my_board : t) (acc_mines : bool Array.t Array.t) =
+let copy_mines (my_board : gameboard) (acc_mines : bool Array.t Array.t)
+    =
   let acc_totals = calculate_mines my_board acc_mines in
-  for x = 0 to dim_x my_board - 1 do
-    for y = 0 to dim_y my_board - 1 do
+  for x = 0 to internal_dim_x my_board - 1 do
+    for y = 0 to internal_dim_y my_board - 1 do
       let each_loc = (x, y) in
       my_board.(x).(y) <-
         Square.create_square
@@ -106,14 +166,15 @@ let copy_mines (my_board : t) (acc_mines : bool Array.t Array.t) =
   my_board
 
 let rec set_repeat_mines
-    (my_board : t)
+    (my_board : gameboard)
     (number_mines : int)
     (acc : bool Array.t Array.t)
     (bad_loc : loc list) =
   if number_mines = 0 then acc
   else
     let mine_loc =
-      (Random.int (dim_x my_board), Random.int (dim_y my_board))
+      ( Random.int (internal_dim_x my_board),
+        Random.int (internal_dim_y my_board) )
     in
     let mine_sq = acc.(fst mine_loc).(snd mine_loc) in
     if mine_sq || List.mem mine_loc bad_loc then
@@ -124,7 +185,7 @@ let rec set_repeat_mines
       acc.(fst mine_loc).(snd mine_loc) <- true;
       set_repeat_mines my_board (number_mines - 1) acc bad_loc)
 
-let set_mines my_board_dim number_mines start_loc =
+let set_mines my_board_dim number_mines start_loc : t =
   if
     10 <= fst my_board_dim
     && fst my_board_dim <= 99
@@ -136,60 +197,70 @@ let set_mines my_board_dim number_mines start_loc =
       && number_mines <= (fst my_board_dim * snd my_board_dim) - 9);
 
     let my_board = custom_empty (fst my_board_dim) (snd my_board_dim) in
-    rep_ok my_board;
-    if check_loc my_board start_loc then
-      let off_limits = generate_adj_pts my_board start_loc in
+    around_rep_ok my_board;
+    if check_loc my_board.game_board start_loc then
+      let off_limits = generate_adj_pts my_board.game_board start_loc in
       let mine_locs =
-        set_repeat_mines my_board number_mines
-          (Array.make_matrix (dim_x my_board) (dim_y my_board) false)
+        set_repeat_mines my_board.game_board number_mines
+          (Array.make_matrix
+             (internal_dim_x my_board.game_board)
+             (internal_dim_y my_board.game_board)
+             false)
           (start_loc :: off_limits)
       in
-      return_rep_ok (copy_mines my_board mine_locs)
+      return_rep_ok
+        {
+          game_board = copy_mines my_board.game_board mine_locs;
+          squares_left =
+            (fst my_board_dim * snd my_board_dim) - number_mines;
+          mines = number_mines;
+        }
     else failwith "Invalid start position")
   else failwith "Bad Size Arguments"
 
-let flag b (i : loc) =
-  rep_ok b;
-  b.(fst i).(snd i) <-
-    (try Square.flag b.(fst i).(snd i) with
+let flag (b : t) (i : loc) =
+  around_rep_ok b;
+  b.game_board.(fst i).(snd i) <-
+    (try Square.flag b.game_board.(fst i).(snd i) with
     | Square.NoOperationPerformed s -> failwith s);
-  rep_ok b
+  around_rep_ok b
 
 let ok_dig_around b (i : loc) =
-  rep_ok b;
-  assert (check_loc b i);
-  let sq = get_loc b i in
+  around_rep_ok b;
+  assert (check_loc b.game_board i);
+  let sq = get_loc b.game_board i in
   match Square.get_val sq with
   | None -> false
   | Some int_val ->
       int_val
-      = (generate_adj_pts b i
-        |> List.map (get_loc b)
+      = (generate_adj_pts b.game_board i
+        |> List.map (get_loc b.game_board)
         |> List.filter Square.get_flag
         |> List.length)
 
-let rec dig b (i : loc) =
-  rep_ok b;
-  assert (check_loc b i);
-  let sq = get_loc b i in
-  b.(fst i).(snd i) <-
+let rec dig (b : t) (i : loc) =
+  around_rep_ok b;
+  assert (check_loc b.game_board i);
+  let sq = get_loc b.game_board i in
+  b.game_board.(fst i).(snd i) <-
     (try Square.dig sq with
     | Square.Explode -> raise Mine
     | Square.NoOperationPerformed s -> failwith s);
-  rep_ok b;
+  b.squares_left <- b.squares_left - 1;
+  around_rep_ok b;
   dig_around b i;
-  rep_ok b
+  around_rep_ok b
 
 and has_dug b i = get_loc b i |> Square.get_dug |> not
 
 and dig_around b i =
   if ok_dig_around b i then
     ignore
-      (generate_adj_pts b i
-      |> List.filter (check_loc b)
-      |> List.filter (has_dug b)
+      (generate_adj_pts b.game_board i
+      |> List.filter (check_loc b.game_board)
+      |> List.filter (has_dug b.game_board)
       |> List.map (fun my_loc ->
-             if has_dug b my_loc then dig b my_loc else ()))
+             if has_dug b.game_board my_loc then dig b my_loc else ()))
   else ()
 
 let add_x_axis n =
@@ -240,39 +311,44 @@ let pp_given_location b loc =
   in
   pp_single_square_string process_char (pp_color_match process_char)
 
-let pp_answers b =
+let pp_answers (b : t) =
   ANSITerminal.(
-    for y = 0 to dim_y b - 1 do
-      for x = 0 to dim_x b - 1 do
+    for y = 0 to internal_dim_y b.game_board - 1 do
+      for x = 0 to internal_dim_x b.game_board - 1 do
         print_string
           [ Background White; Foreground Black ]
           (if x = 0 then
-           let index = dim_y b - y - 1 in
+           let index = internal_dim_y b.game_board - y - 1 in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "");
         pp_single_square_string
-          (Square.test_print (get_loc b (x, dim_y b - y - 1)))
+          (Square.test_print
+             (get_loc b.game_board
+                (x, internal_dim_y b.game_board - y - 1)))
           (pp_color_match
-             (Square.test_print (get_loc b (x, dim_y b - y - 1))))
+             (Square.test_print
+                (get_loc b.game_board
+                   (x, internal_dim_y b.game_board - y - 1))))
       done;
       print_string [ default ] "\n"
     done;
-    add_x_axis (dim_x b);
+    add_x_axis (internal_dim_x b.game_board);
     print_string [ default ] " \n")
 
-let pp_board b =
+let pp_board (b : t) =
   print_endline "\n";
   ANSITerminal.(
-    for y = 0 to dim_y b - 1 do
-      for x = 0 to dim_x b - 1 do
+    for y = 0 to internal_dim_y b.game_board - 1 do
+      for x = 0 to internal_dim_x b.game_board - 1 do
         print_string
           [ Background White; Foreground Black ]
           (if x = 0 then
-           let index = dim_y b - y - 1 in
+           let index = internal_dim_y b.game_board - y - 1 in
            (if index < 10 then "0" else "") ^ string_of_int index ^ "|"
           else "");
-        pp_given_location b (x, dim_y b - y - 1)
+        pp_given_location b.game_board
+          (x, internal_dim_y b.game_board - y - 1)
       done;
       print_string [ default ] "\n"
     done;
-    add_x_axis (dim_x b))
+    add_x_axis (internal_dim_x b.game_board))
