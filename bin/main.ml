@@ -78,8 +78,12 @@ and start_game (size : int * int) (loc : int * int) (num_mines : int) =
   move board
 
 and move (board : Board.t) =
-  print_endline
-    "\nEnter the location you would like to perform your move";
+  ">>>>>>> "
+  ^ (Unix.gettimeofday () -. Board.start_time board
+    |> int_of_float |> string_of_int)
+  ^ " seconds elapsed <<<<<<<"
+  |> print_endline;
+  print_endline "Enter the location you would like to perform your move";
   print_string "> ";
   let pos = read_line () in
   if pos = "quit" then quit "Quitting!";

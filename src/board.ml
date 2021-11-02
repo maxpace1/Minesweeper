@@ -6,6 +6,7 @@ type t = {
   game_board : gameboard;
   mutable squares_left : int;
   mines : int;
+  mutable start_time : float;
 }
 
 type loc = int * int
@@ -28,6 +29,7 @@ let empty : t =
     game_board = Array.make_matrix 30 16 Square.blank;
     squares_left = 480;
     mines = 0;
+    start_time = Unix.gettimeofday ();
   }
 
 let custom_empty x y : t =
@@ -36,6 +38,7 @@ let custom_empty x y : t =
       game_board = Array.make_matrix x y Square.blank;
       squares_left = x * y;
       mines = 0;
+      start_time = Unix.gettimeofday ();
     }
   else failwith "Bad Size Arguments"
 
@@ -215,6 +218,7 @@ let set_mines my_board_dim number_mines start_loc : t =
           squares_left =
             (fst my_board_dim * snd my_board_dim) - number_mines;
           mines = number_mines;
+          start_time = Unix.gettimeofday ();
         }
     else failwith "Invalid start position")
   else failwith "Bad Size Arguments"
@@ -356,3 +360,5 @@ let pp_board (b : t) =
     done;
     add_x_axis (internal_dim_x b.game_board));
   print_endline (string_of_int b.squares_left)
+
+let start_time board = board.start_time
