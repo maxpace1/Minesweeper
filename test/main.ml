@@ -161,10 +161,14 @@ let flag_test = alter_board_test get_flag flag
 
 let dig_test = alter_board_test get_dug dig
 
+let trial_dig square_x =
+  if not (Square.get_dug square_x) then Square.dig square_x
+  else square_x
+
 let loc_value_test name board loc out =
   name >:: fun _ ->
   assert_equal out
-    (match Square.get_val (get_loc_apply_fun board loc Square.dig) with
+    (match Square.get_val (get_loc_apply_fun board loc trial_dig) with
     | Some i -> i
     | None -> failwith "Nothing to see here")
 
@@ -230,8 +234,27 @@ let board_tests =
       empty_board (0, 0) true;
     flag_test "flagging flagged square should mark it as unflagged"
       empty_board (1, 1) false;
-    dig_test "digging undig square should mark it as dug" empty_board
+    dig_test "digging undug square should mark it as dug"
+      (set_mines (30, 16) 0 (0, 0))
       (2, 2) true;
+    loc_value_test "FF digging mine board start_pos (1 ,0) is 3"
+      mine_board (6, 5) 3;
+    loc_value_test "FF digging mine board start_pos (1 ,1) is 5"
+      mine_board (6, 6) 5;
+    loc_value_test "FF digging mine board start_pos (0 ,1) is 3"
+      mine_board (5, 6) 3;
+    loc_value_test "FF digging mine board start_pos (-1 ,1) is 5"
+      mine_board (4, 6) 5;
+    loc_value_test "FF digging mine board start_pos (-1 ,0) is 3"
+      mine_board (4, 5) 3;
+    loc_value_test "FF digging mine board start_pos (-1 ,-1) is 5"
+      mine_board (4, 4) 5;
+    loc_value_test "FF digging mine board start_pos (0 ,-1) is 3"
+      mine_board (5, 4) 3;
+    loc_value_test "FF digging mine board start_pos (1 ,-1) is 5"
+      mine_board (6, 4) 5;
+    loc_value_test "FF digging mine board start_pos is 0" mine_board
+      (5, 5) 0;
     ( "test to output pretty printed empty board" >:: fun _ ->
       print_endline "\n\n";
       pp_board empty_board;
@@ -247,6 +270,14 @@ let board_tests =
     ( "test to output answers pretty printed random board" >:: fun _ ->
       print_endline "\n\n";
       pp_answers random_board;
+      assert true );
+    ( "test to output pretty printed mine board" >:: fun _ ->
+      print_endline "\n\n";
+      pp_board mine_board;
+      assert true );
+    ( "test to output answers pretty printed mine board" >:: fun _ ->
+      print_endline "\n\n";
+      pp_answers mine_board;
       assert true );
   ]
 
