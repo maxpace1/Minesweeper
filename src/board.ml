@@ -6,6 +6,8 @@ type loc = int * int
 
 let _ = Random.init (int_of_float (Unix.gettimeofday ()))
 
+let start_time = int_of_float (Unix.gettimeofday ())
+
 exception Mine
 
 (* AF: A 2D array of squares.

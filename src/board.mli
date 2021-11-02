@@ -22,6 +22,9 @@ val get_loc_apply_fun : t -> loc -> (Square.t -> 'a) -> 'a
     [location] from board [board] and applies a function [sq_fun] to it,
     returning the result. *)
 
+val start_time : int
+(** The time the game was started *)
+
 (* Operations *)
 
 val empty : t
