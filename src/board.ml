@@ -124,8 +124,9 @@ let squares_left_rep_ok (b : t) =
   else assert true
 
 let rep_ok (b : t) =
-  if rep_ok_on then around_rep_ok b;
-  squares_left_rep_ok b
+  if rep_ok_on then (
+    around_rep_ok b;
+    squares_left_rep_ok b)
 
 let return_rep_ok t =
   rep_ok t;
@@ -197,7 +198,7 @@ let set_mines my_board_dim number_mines start_loc : t =
       && number_mines <= (fst my_board_dim * snd my_board_dim) - 9);
 
     let my_board = custom_empty (fst my_board_dim) (snd my_board_dim) in
-    around_rep_ok my_board;
+    rep_ok my_board;
     if check_loc my_board.game_board start_loc then
       let off_limits = generate_adj_pts my_board.game_board start_loc in
       let mine_locs =
@@ -219,14 +220,14 @@ let set_mines my_board_dim number_mines start_loc : t =
   else failwith "Bad Size Arguments"
 
 let flag (b : t) (i : loc) =
-  around_rep_ok b;
+  rep_ok b;
   b.game_board.(fst i).(snd i) <-
     (try Square.flag b.game_board.(fst i).(snd i) with
     | Square.NoOperationPerformed s -> failwith s);
-  around_rep_ok b
+  rep_ok b
 
 let ok_dig_around b (i : loc) =
-  around_rep_ok b;
+  rep_ok b;
   assert (check_loc b.game_board i);
   let sq = get_loc b.game_board i in
   match Square.get_val sq with
@@ -239,7 +240,7 @@ let ok_dig_around b (i : loc) =
         |> List.length)
 
 let rec dig (b : t) (i : loc) =
-  around_rep_ok b;
+  rep_ok b;
   if not (check_loc b.game_board i) then
     raise (Invalid_argument "Invalid location on the board!")
   else
@@ -249,9 +250,9 @@ let rec dig (b : t) (i : loc) =
       | Square.Explode -> raise Mine
       | Square.NoOperationPerformed s -> failwith s);
     b.squares_left <- b.squares_left - 1;
-    around_rep_ok b;
+    rep_ok b;
     dig_around b i;
-    around_rep_ok b
+    rep_ok b
 
 and has_dug b i = get_loc b i |> Square.get_dug |> not
 
@@ -353,4 +354,5 @@ let pp_board (b : t) =
       done;
       print_string [ default ] "\n"
     done;
-    add_x_axis (internal_dim_x b.game_board))
+    add_x_axis (internal_dim_x b.game_board));
+  print_endline (string_of_int b.squares_left)
