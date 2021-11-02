@@ -1,7 +1,10 @@
 (** A representation of the gameboard *)
 
-type t
+type gameboard
 (** The abstract type representing a gameboard *)
+
+type t
+(** The abstract type representing a gameboard and its associated data *)
 
 val dim_x : t -> int
 (** The size of the board in the x-direction, i.e. the number of Squares
