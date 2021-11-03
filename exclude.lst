@@ -8,5 +8,4 @@ demo/*
 .ocamlinit
 *.pdf
 _coverage/*
-demo1/*
 *.coverage

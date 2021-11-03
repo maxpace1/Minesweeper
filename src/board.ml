@@ -360,7 +360,7 @@ let pp_board (b : t) =
       done;
       print_string [ default ] "\n"
     done;
-    add_x_axis (internal_dim_x b.game_board));
-  print_endline (string_of_int b.squares_left)
+    add_x_axis (internal_dim_x b.game_board))
+(* ; print_endline (string_of_int b.squares_left) *)
 
 let start_time board = board.start_time
