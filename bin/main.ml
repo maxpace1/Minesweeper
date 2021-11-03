@@ -10,7 +10,6 @@ let quit msg =
 let parse_pair (str : string) : int * int =
   let lst_str = String.split_on_char ' ' (String.trim str) in
   let lst_int = List.map int_of_string lst_str in
-  assert (List.length lst_int = 2);
   match lst_int with
   | [ x; y ] -> (x, y)
   | _ -> failwith "Invalid input"

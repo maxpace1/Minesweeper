@@ -2,6 +2,15 @@ type sq_type = Square.t
 
 type gameboard = sq_type Array.t Array.t
 
+(* AF/RI for gameboard
+
+   AF: A 2D array of squares.
+
+   RI: Each square has a [mines_around] field that accurately represents
+   the number of mines surrounding it, and is a valid square as laid out
+   in the square compilation unit. Each element in the array must be the
+   same length. The board cannot be empty (i.e. contain no squares) *)
+
 type t = {
   game_board : gameboard;
   mutable squares_left : int;
@@ -16,13 +25,6 @@ let _ = Random.init (int_of_float (Unix.gettimeofday ()))
 let rep_ok_on = true
 
 exception Mine
-
-(* AF: A 2D array of squares.
-
-   RI: Each square has a [mines_around] field that accurately represents
-   the number of mines surrounding it, and is a valid square as laid out
-   in the square compilation unit. Each element in the array must be the
-   same length. The board cannot be empty (i.e. contain no squares) *)
 
 let empty : t =
   {
