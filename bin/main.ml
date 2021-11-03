@@ -31,6 +31,12 @@ let rec output_input_func_pair
           output_input_func_pair instructions default func_operate
             error_msg)
 
+let calc_default_mines (start_size : int * int) =
+  int_of_float
+    (floor
+       ((99. /. 480. *. float_of_int (fst start_size * snd start_size))
+       +. 0.5))
+
 (** [inputs_game start_size] takes in a gameboard size and gets user
     desired factors like starting location and load factor *)
 let rec input_game (start_size : int * int) =
@@ -50,7 +56,7 @@ and start_game (size : int * int) (loc : int * int) (num_mines : int) =
   let board = Board.set_mines size num_mines loc in
   Board.dig board loc;
   Board.pp_board board;
-  move board
+  move_loc board
 
 and read_mine_input (start_size : int * int) (x : int) (y : int) =
   print_string
@@ -62,12 +68,7 @@ and read_mine_input (start_size : int * int) (x : int) (y : int) =
   print_endline ".\n";
   print_string "> ";
   match read_line () with
-  | "default" ->
-      int_of_float
-        (floor
-           (99. /. 480.
-            *. float_of_int (fst start_size * snd start_size)
-           +. 0.5))
+  | "default" -> calc_default_mines start_size
   | otherwise -> (
       try
         let input = String.trim otherwise |> int_of_string in
@@ -79,7 +80,7 @@ and read_mine_input (start_size : int * int) (x : int) (y : int) =
           print_endline "Invalid mine input!";
           read_mine_input start_size x y)
 
-and move (board : Board.t) =
+and move_loc (board : Board.t) =
   "\n>>>>>>> "
   ^ (Unix.gettimeofday () -. Board.start_time board
     |> int_of_float |> string_of_int)
@@ -93,9 +94,12 @@ and move (board : Board.t) =
     try parse_pair pos with
     | Failure f ->
         print_endline "\nInvalid point";
-        move board;
+        move_loc board;
         quit ""
   in
+  execute_move board pos point
+
+and execute_move (board : Board.t) (pos : string) (point : int * int) =
   print_endline
     "\n\
      Enter the move you would like to perform at this location (dig, \
@@ -108,19 +112,23 @@ and move (board : Board.t) =
       | Invalid_argument s -> print_endline s)
   | "dig" -> (
       try Board.dig board point with
-      | Mine -> (
-          Board.pp_answers board;
-          print_endline "There was a mine in this square! You lose!";
-          print_endline "\nWould you like to play again (yes or no)?";
-          print_string "> ";
-          match read_line () with
-          | "yes" -> main ()
-          | _ -> quit "Quitting!")
+      | Mine -> lose board
       | Failure f -> print_endline f
       | Invalid_argument s -> print_endline s)
   | "quit" -> quit "Quitting!"
   | _ -> print_endline "Invalid move");
+  finalize_move board
 
+and lose (board : Board.t) =
+  Board.pp_answers board;
+  print_endline "There was a mine in this square! You lose!";
+  print_endline "\nWould you like to play again (yes or no)?";
+  print_string "> ";
+  match read_line () with
+  | "yes" -> main ()
+  | _ -> quit "Quitting!"
+
+and finalize_move (board : Board.t) =
   Board.pp_board board;
   if squares_left board = 0 then (
     print_endline "\nCongratulations, you found every mine!";
@@ -129,7 +137,7 @@ and move (board : Board.t) =
     match read_line () with
     | "yes" -> main ()
     | _ -> quit "Quitting!")
-  else move board
+  else move_loc board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 and main () =
