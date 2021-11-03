@@ -85,6 +85,10 @@ and move (board : Board.t) =
     |> int_of_float |> string_of_int)
   ^ " seconds elapsed <<<<<<<\n"
   |> print_endline;
+  "\n>>>>>>> "
+  ^ string_of_int (Board.flags_left board)
+  ^ " flags remaining <<<<<<<\n"
+  |> print_endline;
   print_endline "Enter the location you would like to perform your move";
   print_string "> ";
   let pos = read_line () in

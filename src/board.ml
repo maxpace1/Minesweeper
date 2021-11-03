@@ -16,6 +16,7 @@ type t = {
   mutable squares_left : int;
   mines : int;
   mutable start_time : float;
+  mutable flags_left : int;
 }
 
 type loc = int * int
@@ -32,6 +33,7 @@ let empty : t =
     squares_left = 480;
     mines = 0;
     start_time = Unix.gettimeofday ();
+    flags_left = -1;
   }
 
 let custom_empty x y : t =
@@ -41,6 +43,7 @@ let custom_empty x y : t =
       squares_left = x * y;
       mines = 0;
       start_time = Unix.gettimeofday ();
+      flags_left = -1;
     }
   else failwith "Bad Size Arguments"
 
@@ -221,6 +224,7 @@ let set_mines my_board_dim number_mines start_loc : t =
             (fst my_board_dim * snd my_board_dim) - number_mines;
           mines = number_mines;
           start_time = Unix.gettimeofday ();
+          flags_left = number_mines;
         }
     else failwith "Invalid start position")
   else failwith "Bad Size Arguments"
@@ -367,5 +371,7 @@ let pp_board (b : t) =
 (* ; print_endline (string_of_int b.squares_left) *)
 
 let start_time board = board.start_time
+
+let flags_left board = board.flags_left
 
 let squares_left board = board.squares_left
