@@ -10,7 +10,6 @@ let quit msg =
 let parse_pair (str : string) : int * int =
   let lst_str = String.split_on_char ' ' (String.trim str) in
   let lst_int = List.map int_of_string lst_str in
-  assert (List.length lst_int = 2);
   match lst_int with
   | [ x; y ] -> (x, y)
   | _ -> failwith "Invalid input"
@@ -44,38 +43,46 @@ let rec input_game (start_size : int * int) =
   in
   print_endline
     "\n\
-     Please enter the ratio of mines to squares on the board or enter \
-     \"default\" for the default ratio.\n";
+     Please enter the number of mines to be on the board or \
+     \"default\" for the default ratio. \n\
+     Note that the number of mines must be at least 1 and no more than ";
+  print_int ((fst start_size * snd start_size) - 9);
+  print_endline ".\n";
   print_string "> ";
-  let fac =
+  let mines =
     match read_line () with
-    | "default" -> 0.2
+    | "default" ->
+        int_of_float
+          (floor
+             (99. /. 480.
+              *. float_of_int (fst start_size * snd start_size)
+             +. 0.5))
     | otherwise -> (
-        try String.trim otherwise |> float_of_string with
+        try
+          let input = String.trim otherwise |> int_of_string in
+          if input > 0 && input <= (fst start_size * snd start_size) - 9
+          then input
+          else failwith "Out of bounds"
+        with
         | _ -> quit "Malformed input. Quitting game")
   in
-  start_game start_size (x, y) fac
+  start_game start_size (x, y) mines
 
-(** [start_game start_size start_loc load] takes in a gameboard size,
-    starting location, load factor and kicks off the game *)
-and start_game (size : int * int) (loc : int * int) (load : float) =
-  if load > 1.0 then quit "Load factor must be less than 1.0"
-  else if load < 0.0 then quit "Load factor must be greater than 0.0"
-  else
-    let num_mines =
-      max
-        (int_of_float
-           ((float_of_int (fst size * snd size) *. load) -. 9.))
-        0
-    in
-    let board = Board.set_mines size num_mines loc in
-    Board.dig board loc;
-    Board.pp_board board;
-    move board
+(** [start_game start_size start_loc num_mines] takes in a gameboard
+    size, starting location, number of mines and kicks off the game *)
+and start_game (size : int * int) (loc : int * int) (num_mines : int) =
+  let board = Board.set_mines size num_mines loc in
+  Board.dig board loc;
+  Board.pp_board board;
+  move board
 
 and move (board : Board.t) =
-  print_endline
-    "\nEnter the location you would like to perform your move";
+  ">>>>>>> "
+  ^ (Unix.gettimeofday () -. Board.start_time board
+    |> int_of_float |> string_of_int)
+  ^ " seconds elapsed <<<<<<<"
+  |> print_endline;
+  print_endline "Enter the location you would like to perform your move";
   print_string "> ";
   let pos = read_line () in
   if pos = "quit" then quit "Quitting!";
@@ -89,7 +96,7 @@ and move (board : Board.t) =
   print_endline
     "\n\
      Enter the move you would like to perform at this location (dig, \
-     flag, quit)";
+     flag, quit)\n";
   print_string "> ";
   match read_line () with
   | "flag" ->
@@ -125,7 +132,8 @@ and main () =
 
   output_input_func_pair
     "Please enter the size of board you wish to create as x_dim y_dim, \
-     or enter \"default\" for the default size. Enter \"quit\" to quit \n"
+     or enter \"default\" for the default size (30x16). Enter \"quit\" \
+     to quit \n"
     (30, 16) input_game "Malformed input."
 
 (* Execute the game engine. *)

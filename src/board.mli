@@ -1,7 +1,10 @@
 (** A representation of the gameboard *)
 
-type t
+type gameboard
 (** The abstract type representing a gameboard *)
+
+type t
+(** The abstract type representing a gameboard and its associated data *)
 
 val dim_x : t -> int
 (** The size of the board in the x-direction, i.e. the number of Squares
@@ -21,6 +24,9 @@ val get_loc_apply_fun : t -> loc -> (Square.t -> 'a) -> 'a
 (** [get_loc_apply_fun board location sq_fun] gets the square at a given
     [location] from board [board] and applies a function [sq_fun] to it,
     returning the result. *)
+
+val start_time : t -> float
+(** The time the game was started *)
 
 (* Operations *)
 
