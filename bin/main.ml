@@ -41,31 +41,7 @@ let rec input_game (start_size : int * int) =
        or enter \"default\" for the default location.\n"
       default_pos Fun.id "Malformed input."
   in
-  print_endline
-    "\n\
-     Please enter the number of mines to be on the board or \
-     \"default\" for the default number of mines. \n\
-     Note that the number of mines must be at least 1 and no more than ";
-  print_int ((fst start_size * snd start_size) - 9);
-  print_endline ".\n";
-  print_string "> ";
-  let mines =
-    match read_line () with
-    | "default" ->
-        int_of_float
-          (floor
-             (99. /. 480.
-              *. float_of_int (fst start_size * snd start_size)
-             +. 0.5))
-    | otherwise -> (
-        try
-          let input = String.trim otherwise |> int_of_string in
-          if input > 0 && input <= (fst start_size * snd start_size) - 9
-          then input
-          else failwith "Out of bounds"
-        with
-        | _ -> quit "Malformed input. Quitting game")
-  in
+  let mines = read_mine_input start_size x y in
   start_game start_size (x, y) mines
 
 (** [start_game start_size start_loc num_mines] takes in a gameboard
@@ -76,11 +52,38 @@ and start_game (size : int * int) (loc : int * int) (num_mines : int) =
   Board.pp_board board;
   move board
 
+and read_mine_input (start_size : int * int) (x : int) (y : int) =
+  print_string
+    "\n\
+     Please enter the number of mines to be on the board or \
+     \"default\" for the default number of mines. \n\
+     Note that the number of mines must be at least 1 and no more than ";
+  print_int ((fst start_size * snd start_size) - 9);
+  print_endline ".\n";
+  print_string "> ";
+  match read_line () with
+  | "default" ->
+      int_of_float
+        (floor
+           (99. /. 480.
+            *. float_of_int (fst start_size * snd start_size)
+           +. 0.5))
+  | otherwise -> (
+      try
+        let input = String.trim otherwise |> int_of_string in
+        if input > 0 && input <= (fst start_size * snd start_size) - 9
+        then input
+        else failwith "Out of bounds"
+      with
+      | _ ->
+          print_endline "Invalid mine input!";
+          read_mine_input start_size x y)
+
 and move (board : Board.t) =
-  ">>>>>>> "
+  "\n>>>>>>> "
   ^ (Unix.gettimeofday () -. Board.start_time board
     |> int_of_float |> string_of_int)
-  ^ " seconds elapsed <<<<<<<"
+  ^ " seconds elapsed <<<<<<<\n"
   |> print_endline;
   print_endline "Enter the location you would like to perform your move";
   print_string "> ";
@@ -89,7 +92,7 @@ and move (board : Board.t) =
   let point =
     try parse_pair pos with
     | Failure f ->
-        print_endline "Invalid position";
+        print_endline "\nInvalid point";
         move board;
         quit ""
   in

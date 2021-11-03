@@ -251,7 +251,7 @@ let ok_dig_around b (i : loc) =
 let rec dig (b : t) (i : loc) =
   rep_ok b;
   if not (check_loc b.game_board i) then
-    raise (Invalid_argument "Invalid location on the board!")
+    raise (Invalid_argument "\nInvalid location on the board!")
   else
     let sq = get_loc b.game_board i in
     b.game_board.(fst i).(snd i) <-
