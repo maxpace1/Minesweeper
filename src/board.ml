@@ -23,7 +23,7 @@ type loc = int * int
 
 let _ = Random.init (int_of_float (Unix.gettimeofday ()))
 
-let rep_ok_on = true
+let rep_ok_on = false
 
 exception Mine
 
@@ -239,7 +239,7 @@ let flag (b : t) (i : loc) =
       | Square.NoOperationPerformed s -> failwith s);
   rep_ok b
 
-let ok_dig_around b (i : loc) =
+let ok_auto_around b (i : loc) =
   rep_ok b;
   assert (check_loc b.game_board i);
   let sq = get_loc b.game_board i in
@@ -251,6 +251,14 @@ let ok_dig_around b (i : loc) =
         |> List.map (get_loc b.game_board)
         |> List.filter Square.get_flag
         |> List.length)
+
+let ok_dig_around b (i : loc) =
+  rep_ok b;
+  assert (check_loc b.game_board i);
+  let sq = get_loc b.game_board i in
+  match Square.get_val sq with
+  | None -> false
+  | Some int_val -> int_val = 0
 
 let rec dig (b : t) (i : loc) =
   rep_ok b;

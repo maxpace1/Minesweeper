@@ -50,6 +50,10 @@ doc:
 opendoc:
 	open _build/default/_doc/_html/index.html
 
+docs:
+	make doc
+	make opendoc
+
 openbisect:
 	open _coverage/index.html
 	
