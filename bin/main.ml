@@ -81,7 +81,10 @@ and move (board : Board.t) =
   if pos = "quit" then quit "Quitting!";
   let point =
     try parse_pair pos with
-    | Failure f -> (-1, -1)
+    | Failure f ->
+        print_endline "Invalid position";
+        move board;
+        quit ""
   in
   print_endline
     "\n\

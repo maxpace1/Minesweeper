@@ -150,9 +150,12 @@ let set_mines my_board_dim number_mines start_loc =
 
 let flag b (i : loc) =
   rep_ok b;
-  b.(fst i).(snd i) <-
-    (try Square.flag b.(fst i).(snd i) with
-    | Square.NoOperationPerformed s -> failwith s);
+  if not (check_loc b i) then
+    raise (Invalid_argument "Invalid location on the board!")
+  else
+    b.(fst i).(snd i) <-
+      (try Square.flag b.(fst i).(snd i) with
+      | Square.NoOperationPerformed s -> failwith s);
   rep_ok b
 
 let ok_dig_around b (i : loc) =
