@@ -103,7 +103,7 @@ and execute_move (board : Board.t) (pos : string) (point : int * int) =
   print_endline
     "\n\
      Enter the move you would like to perform at this location (dig, \
-     flag, quit)\n";
+     flag, quit)";
   print_string "> ";
   (match read_line () with
   | "flag" -> (
@@ -146,8 +146,8 @@ and main () =
 
   output_input_func_pair
     "Please enter the size of board you wish to create as x_dim y_dim, \
-     or enter \"default\" for the default size (30x16). Enter \"quit\" \
-     to quit \n"
+     or enter \"default\" for the default size (30x16). Sizes need to \
+     be between 10x10 and 99x99 Enter \"quit\" to quit \n"
     (30, 16) input_game "Malformed input."
 
 (* Execute the game engine. *)
