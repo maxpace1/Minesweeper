@@ -367,3 +367,5 @@ let pp_board (b : t) =
 (* ; print_endline (string_of_int b.squares_left) *)
 
 let start_time board = board.start_time
+
+let squares_left board = board.squares_left

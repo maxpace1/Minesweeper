@@ -28,6 +28,9 @@ val get_loc_apply_fun : t -> loc -> (Square.t -> 'a) -> 'a
 val start_time : t -> float
 (** The time the game was started *)
 
+val squares_left : t -> int
+(** The number of squares left to be dug up on the board *)
+
 (* Operations *)
 
 val empty : t

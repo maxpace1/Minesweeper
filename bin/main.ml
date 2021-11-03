@@ -44,7 +44,7 @@ let rec input_game (start_size : int * int) =
   print_endline
     "\n\
      Please enter the number of mines to be on the board or \
-     \"default\" for the default ratio. \n\
+     \"default\" for the default number of mines. \n\
      Note that the number of mines must be at least 1 and no more than ";
   print_int ((fst start_size * snd start_size) - 9);
   print_endline ".\n";
@@ -98,15 +98,13 @@ and move (board : Board.t) =
      Enter the move you would like to perform at this location (dig, \
      flag, quit)\n";
   print_string "> ";
-  match read_line () with
-  | "flag" ->
-      (try Board.flag board point with
+  (match read_line () with
+  | "flag" -> (
+      try Board.flag board point with
       | Failure f -> print_endline f
-      | Invalid_argument s -> print_endline s);
-      Board.pp_board board;
-      move board
-  | "dig" ->
-      (try Board.dig board point with
+      | Invalid_argument s -> print_endline s)
+  | "dig" -> (
+      try Board.dig board point with
       | Mine -> (
           Board.pp_answers board;
           print_endline "There was a mine in this square! You lose!";
@@ -116,14 +114,19 @@ and move (board : Board.t) =
           | "yes" -> main ()
           | _ -> quit "Quitting!")
       | Failure f -> print_endline f
-      | Invalid_argument s -> print_endline s);
-      Board.pp_board board;
-      move board
+      | Invalid_argument s -> print_endline s)
   | "quit" -> quit "Quitting!"
-  | _ ->
-      print_endline "Invalid move";
-      Board.pp_board board;
-      move board
+  | _ -> print_endline "Invalid move");
+
+  Board.pp_board board;
+  if squares_left board = 0 then (
+    print_endline "\nCongratulations, you found every mine!";
+    print_endline "\nWould you like to play again (yes or no)?";
+    print_string "> ";
+    match read_line () with
+    | "yes" -> main ()
+    | _ -> quit "Quitting!")
+  else move board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 and main () =
