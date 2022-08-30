@@ -234,10 +234,14 @@ let flag (b : t) (i : loc) =
   if not (check_loc b.game_board i) then
     raise (Invalid_argument "Invalid location on the board!")
   else
-    b.game_board.(fst i).(snd i) <-
-      (try Square.flag b.game_board.(fst i).(snd i) with
-      | Square.NoOperationPerformed s -> failwith s);
-  rep_ok b
+    let new_sq =
+      try Square.flag b.game_board.(fst i).(snd i) with
+      | Square.NoOperationPerformed s -> failwith s
+    in
+    b.game_board.(fst i).(snd i) <- new_sq;
+    if Square.get_flag new_sq then b.flags_left <- b.flags_left - 1
+    else b.flags_left <- b.flags_left + 1;
+    rep_ok b
 
 let ok_auto_around b (i : loc) =
   rep_ok b;

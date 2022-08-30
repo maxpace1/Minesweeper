@@ -42,7 +42,7 @@ val get_dug : t -> bool
 (** [get_dug sq] checks if [sq] has been dug up yet. *)
 
 val get_flag : t -> bool
-(** [get_flag sq] checks if [sq] has been dug up yet. *)
+(** [get_flag sq] checks if [sq] has been flagged yet. *)
 
 val get_val : t -> int option
 (** [get_val sq] gets the number of surrounding mines of [sq] and

@@ -84,9 +84,9 @@ and move_loc (board : Board.t) =
   "\n>>>>>>> "
   ^ (Unix.gettimeofday () -. Board.start_time board
     |> int_of_float |> string_of_int)
-  ^ " seconds elapsed <<<<<<<\n"
+  ^ " seconds elapsed <<<<<<<"
   |> print_endline;
-  "\n>>>>>>> "
+  ">>>>>>> "
   ^ string_of_int (Board.flags_left board)
   ^ " flags remaining <<<<<<<\n"
   |> print_endline;
